@@ -44,7 +44,7 @@ public class DonationCheckTimer extends BukkitRunnable {
                     instance.getServer().getScheduler().runTask(instance, new Runnable() {
 
                         public void run() {
-                        Bukkit.dispatchCommand(instance.getServer().getConsoleSender(), event.getCommand());
+                            Bukkit.dispatchCommand(instance.getServer().getConsoleSender(), event.getCommand());
                         }
 
                     });
