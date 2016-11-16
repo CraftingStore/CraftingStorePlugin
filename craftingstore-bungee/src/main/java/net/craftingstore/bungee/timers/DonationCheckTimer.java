@@ -1,20 +1,18 @@
-package net.craftingstore.bukkit.timers;
+package net.craftingstore.bungee.timers;
 
 import com.google.gson.Gson;
 import net.craftingstore.Donation;
-import net.craftingstore.bukkit.CraftingStoreBukkit;
-import net.craftingstore.bukkit.events.DonationReceivedEvent;
+import net.craftingstore.bungee.CraftingStoreBungee;
+import net.craftingstore.bungee.events.DonationReceivedEvent;
 import net.craftingstore.utils.HttpUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
+import net.md_5.bungee.api.plugin.Plugin;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class DonationCheckTimer extends BukkitRunnable {
+public class DonationCheckTimer implements Runnable {
 
     private Plugin instance;
 
@@ -24,7 +22,7 @@ public class DonationCheckTimer extends BukkitRunnable {
 
     public void run() {
         try {
-            String json = HttpUtils.getJson(CraftingStoreBukkit.getInstance().getApiUrl() + "queries/remove");
+            String json = HttpUtils.getJson(CraftingStoreBungee.getInstance().getApiUrl() + "queries/remove");
             JSONParser parser = new JSONParser();
             JSONObject object = (JSONObject) parser.parse(json);
             json = object.get("result").toString();
@@ -33,23 +31,15 @@ public class DonationCheckTimer extends BukkitRunnable {
             Donation[] donations = gson.fromJson(json, Donation[].class);
 
             for (Donation donation : donations) {
-                Bukkit.broadcastMessage(donation.toString());
-
                 String plainUuid = donation.getUuid();
                 String formattedUuid = plainUuid.replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5");
                 UUID uuid = UUID.fromString(formattedUuid);
 
                 final DonationReceivedEvent event = new DonationReceivedEvent(donation.getCommand(), donation.getMcName(), uuid, donation.getPackageName(), donation.getPackagePrice(), donation.getCouponDiscount());
-                instance.getServer().getPluginManager().callEvent(event);
+                instance.getProxy().getPluginManager().callEvent(event);
 
                 if (!event.isCancelled()) {
-                    instance.getServer().getScheduler().runTask(instance, new Runnable() {
-
-                        public void run() {
-                            Bukkit.dispatchCommand(instance.getServer().getConsoleSender(), event.getCommand());
-                        }
-
-                    });
+                    instance.getProxy().getPluginManager().dispatchCommand(instance.getProxy().getConsole(), event.getCommand());
                 }
             }
         } catch (Exception e) {

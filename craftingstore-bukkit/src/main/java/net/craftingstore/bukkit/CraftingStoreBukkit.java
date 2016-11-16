@@ -34,7 +34,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
         apiUrl = "http://api.craftingstore.net/v2/" + key + "/";
 
-        if (!checkApiKey(apiUrl)) {
+        if (!HttpUtils.checkApiKey(getLogger(), apiUrl)) {
             getLogger().log(Level.SEVERE, "Your API key is invalid. The plugin will not work until your API key is valid.");
             return;
         }
@@ -59,18 +59,6 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
     public String getApiUrl() {
         return apiUrl;
-    }
-
-    private boolean checkApiKey(String apiUrl) {
-        try {
-            String json = HttpUtils.getJson(apiUrl + "/check");
-            JSONParser parser = new JSONParser();
-            JSONObject object = (JSONObject) parser.parse(json);
-            return (Boolean) object.get("success");
-        } catch (Exception e) {
-            getLogger().log(Level.SEVERE, "An error occurred while checking the API key.", e);
-        }
-        return false;
     }
 
 }

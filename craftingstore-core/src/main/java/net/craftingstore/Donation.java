@@ -1,4 +1,4 @@
-package net.craftingstore.bukkit;
+package net.craftingstore;
 
 public class Donation {
 
