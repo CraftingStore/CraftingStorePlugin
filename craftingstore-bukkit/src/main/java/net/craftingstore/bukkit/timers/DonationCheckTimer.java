@@ -33,8 +33,6 @@ public class DonationCheckTimer extends BukkitRunnable {
             Donation[] donations = gson.fromJson(json, Donation[].class);
 
             for (Donation donation : donations) {
-                Bukkit.broadcastMessage(donation.toString());
-
                 String plainUuid = donation.getUuid();
                 String formattedUuid = plainUuid.replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5");
                 UUID uuid = UUID.fromString(formattedUuid);
@@ -46,7 +44,7 @@ public class DonationCheckTimer extends BukkitRunnable {
                     instance.getServer().getScheduler().runTask(instance, new Runnable() {
 
                         public void run() {
-                            Bukkit.dispatchCommand(instance.getServer().getConsoleSender(), event.getCommand());
+                        Bukkit.dispatchCommand(instance.getServer().getConsoleSender(), event.getCommand());
                         }
 
                     });
