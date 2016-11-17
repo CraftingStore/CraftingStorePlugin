@@ -1,20 +1,31 @@
 package net.craftingstore;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Donation {
 
     private String command;
-    private String mc_name;
+
+    @SerializedName("mc_name")
+    private String username;
+
     private String uuid;
-    private String package_name;
-    private int package_price;
-    private int coupon_discount;
+
+    @SerializedName("package_name")
+    private String packageName;
+
+    @SerializedName("package_price")
+    private int packagePrice;
+
+    @SerializedName("coupon_discount")
+    private int couponDiscount;
 
     public String getCommand() {
         return command;
     }
 
     public String getMcName() {
-        return mc_name;
+        return username;
     }
 
     public String getUuid() {
@@ -22,20 +33,15 @@ public class Donation {
     }
 
     public String getPackageName() {
-        return package_name;
+        return packageName;
     }
 
     public int getPackagePrice() {
-        return package_price;
+        return packagePrice;
     }
 
     public int getCouponDiscount() {
-        return coupon_discount;
-    }
-
-    @Override
-    public String toString() {
-        return command + " - " + mc_name + " - " + uuid + " - " + package_name + " - " + package_price + " - " + coupon_discount;
+        return couponDiscount;
     }
 
 }

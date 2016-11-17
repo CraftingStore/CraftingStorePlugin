@@ -1,7 +1,9 @@
 package net.craftingstore.bungee.timers;
 
 import com.google.gson.Gson;
+import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Donation;
+import net.craftingstore.bukkit.CraftingStoreBukkit;
 import net.craftingstore.bungee.CraftingStoreBungee;
 import net.craftingstore.bungee.events.DonationReceivedEvent;
 import net.craftingstore.utils.HttpUtils;
@@ -22,13 +24,7 @@ public class DonationCheckTimer implements Runnable {
 
     public void run() {
         try {
-            String json = HttpUtils.getJson(CraftingStoreBungee.getInstance().getApiUrl() + "queries/remove");
-            JSONParser parser = new JSONParser();
-            JSONObject object = (JSONObject) parser.parse(json);
-            json = object.get("result").toString();
-
-            Gson gson = new Gson();
-            Donation[] donations = gson.fromJson(json, Donation[].class);
+            Donation[] donations = CraftingStoreAPI.getInstance().getQueries(CraftingStoreBungee.getInstance().getKey());
 
             for (Donation donation : donations) {
                 String plainUuid = donation.getUuid();

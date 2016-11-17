@@ -38,16 +38,4 @@ public class HttpUtils {
         }
     }
 
-    public static boolean checkApiKey(Logger logger, String apiUrl) {
-        try {
-            String json = HttpUtils.getJson(apiUrl + "/check");
-            JSONParser parser = new JSONParser();
-            JSONObject object = (JSONObject) parser.parse(json);
-            return (Boolean) object.get("success");
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "An error occurred while checking the API key.", e);
-        }
-        return false;
-    }
-
 }

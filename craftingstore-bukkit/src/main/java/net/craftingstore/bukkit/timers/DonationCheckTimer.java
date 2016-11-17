@@ -1,6 +1,7 @@
 package net.craftingstore.bukkit.timers;
 
 import com.google.gson.Gson;
+import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Donation;
 import net.craftingstore.bukkit.CraftingStoreBukkit;
 import net.craftingstore.bukkit.events.DonationReceivedEvent;
@@ -24,14 +25,7 @@ public class DonationCheckTimer extends BukkitRunnable {
 
     public void run() {
         try {
-            String json = HttpUtils.getJson(CraftingStoreBukkit.getInstance().getApiUrl() + "queries/remove");
-            JSONParser parser = new JSONParser();
-            JSONObject object = (JSONObject) parser.parse(json);
-            json = object.get("result").toString();
-
-            Gson gson = new Gson();
-            Donation[] donations = gson.fromJson(json, Donation[].class);
-
+            Donation[] donations = CraftingStoreAPI.getInstance().getQueries(CraftingStoreBukkit.getInstance().getKey());
             for (Donation donation : donations) {
                 String plainUuid = donation.getUuid();
                 String formattedUuid = plainUuid.replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5");
