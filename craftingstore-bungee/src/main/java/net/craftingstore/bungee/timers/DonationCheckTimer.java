@@ -1,15 +1,10 @@
 package net.craftingstore.bungee.timers;
 
-import com.google.gson.Gson;
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Donation;
-import net.craftingstore.bukkit.CraftingStoreBukkit;
 import net.craftingstore.bungee.CraftingStoreBungee;
 import net.craftingstore.bungee.events.DonationReceivedEvent;
-import net.craftingstore.utils.HttpUtils;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.util.UUID;
 import java.util.logging.Level;

@@ -1,13 +1,8 @@
 package net.craftingstore.utils;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class HttpUtils {
 

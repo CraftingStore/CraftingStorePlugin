@@ -1,9 +1,10 @@
 package net.craftingstore;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import net.craftingstore.utils.HttpUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+
+import java.lang.reflect.Type;
 
 public class CraftingStoreAPI {
 
@@ -23,10 +24,11 @@ public class CraftingStoreAPI {
 
     public boolean checkKey(String key) throws Exception {
         String url = API_URL + key + "/check";
-        String jsonString = HttpUtils.getJson(url);
-        JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
-        JSONObject result = (JSONObject) json.get("result");
-        return (Boolean) result.get("success");
+        String json = HttpUtils.getJson(url);
+
+        Type type = new TypeToken<Root<Result>>() {}.getType();
+        Root<Result> result = gson.fromJson(json, type);
+        return result.getResult().getSuccess();
     }
 
     public Donation[] getQueries(String key) throws Exception {
@@ -38,32 +40,29 @@ public class CraftingStoreAPI {
         if (remove) {
             url = url + "/remove";
         }
+        String json = HttpUtils.getJson(url);
 
-        String jsonString = HttpUtils.getJson(url);
-        JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
-        JSONObject result = (JSONObject) json.get("result");
-
-        return gson.fromJson(result.toString(), Donation[].class);
+        Type type = new TypeToken<Root<Donation[]>>() {}.getType();
+        Root<Donation[]> donations = gson.fromJson(json, type);
+        return donations.getResult();
     }
 
     public Payment[] getPayments(String key) throws Exception {
         String url = API_URL + key + "/payments";
+        String json = HttpUtils.getJson(url);
 
-        String jsonString = HttpUtils.getJson(url);
-        JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
-        JSONObject result = (JSONObject) json.get("result");
-
-        return gson.fromJson(result.toJSONString(), Payment[].class);
+        Type type = new TypeToken<Root<Payment[]>>() {}.getType();
+        Root<Payment[]> payments = gson.fromJson(json, type);
+        return payments.getResult();
     }
 
     public Package[] getPackages(String key) throws Exception {
         String url = API_URL + key + "/packages";
+        String json = HttpUtils.getJson(url);
 
-        String jsonString = HttpUtils.getJson(url);
-        JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
-        JSONObject result = (JSONObject) json.get("result");
-
-        return gson.fromJson(result.toJSONString(), Package[].class);
+        Type type = new TypeToken<Root<Package[]>>() {}.getType();
+        Root<Package[]> packages = gson.fromJson(json, type);
+        return packages.getResult();
     }
 
 }
