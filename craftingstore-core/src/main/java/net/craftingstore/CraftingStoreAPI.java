@@ -56,6 +56,14 @@ public class CraftingStoreAPI {
         return gson.fromJson(result.toJSONString(), Payment[].class);
     }
 
+    public Package[] getPackages(String key) throws Exception {
+        String url = API_URL + key + "/packages";
 
+        String jsonString = HttpUtils.getJson(url);
+        JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
+        JSONObject result = (JSONObject) json.get("result");
+
+        return gson.fromJson(result.toJSONString(), Package[].class);
+    }
 
 }
