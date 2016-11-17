@@ -1,5 +1,5 @@
 name: CraftingStore
-main: net.craftingstore.bukkit.CraftingStoreBukkit
+main: net.craftingstore.bungee.CraftingStoreBungee
 version: 1.0-SNAPSHOT
 authors: [Tim-NL, Mrten]
 prefix: CraftingStore
