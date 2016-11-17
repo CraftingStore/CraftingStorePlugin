@@ -43,6 +43,11 @@ public class CraftingStoreBungee extends Plugin {
         }
 
         int interval = getConfig().getInt("interval");
+        if (interval < 60) {
+            getLogger().log(Level.WARNING, "The interval cannot be lower than 60 seconds. An interval of 60 seconds will be used.");
+            interval = 60;
+        }
+
         getProxy().getScheduler().schedule(this, new DonationCheckTimer(this), interval, TimeUnit.SECONDS);
     }
 

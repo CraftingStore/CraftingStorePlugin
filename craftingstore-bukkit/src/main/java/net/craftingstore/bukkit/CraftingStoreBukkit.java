@@ -45,6 +45,11 @@ public class CraftingStoreBukkit extends JavaPlugin {
         }
 
         int interval = getConfig().getInt("interval") * 20;
+        if (interval < 1200) {
+            getLogger().log(Level.WARNING, "The interval cannot be lower than 60 seconds. An interval of 60 seconds will be used.");
+            interval = 1200;
+        }
+
         new DonationCheckTimer(this).runTaskTimerAsynchronously(this, interval, interval);
     }
 
