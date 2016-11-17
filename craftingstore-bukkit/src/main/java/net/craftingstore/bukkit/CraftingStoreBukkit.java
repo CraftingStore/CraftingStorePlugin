@@ -44,7 +44,8 @@ public class CraftingStoreBukkit extends JavaPlugin {
             return;
         }
 
-        new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 0L, 3200L);
+        int interval = getConfig().getInt("interval") * 20;
+        new DonationCheckTimer(this).runTaskTimerAsynchronously(this, interval, interval);
     }
 
     @Override
