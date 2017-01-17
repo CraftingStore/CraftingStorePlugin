@@ -3,7 +3,6 @@ package net.craftingstore.bungee;
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.bungee.config.Config;
 import net.craftingstore.bungee.timers.DonationCheckTimer;
-import net.craftingstore.utils.HttpUtils;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 
@@ -24,6 +23,7 @@ public class CraftingStoreBungee extends Plugin {
     @Override
     public void onEnable() {
         instance = this;
+        config = new Config(this, "config.yml");
 
         String key = getConfig().getString("api-key");
         this.key = key;

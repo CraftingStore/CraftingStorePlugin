@@ -23,8 +23,11 @@ public class DonationCheckTimer implements Runnable {
 
             for (Donation donation : donations) {
                 String plainUuid = donation.getUuid();
-                String formattedUuid = plainUuid.replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5");
-                UUID uuid = UUID.fromString(formattedUuid);
+                UUID uuid = null;
+                if (plainUuid != null && !plainUuid.isEmpty()) {
+                    String formattedUuid = plainUuid.replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5");
+                    uuid = UUID.fromString(formattedUuid);
+                }
 
                 final DonationReceivedEvent event = new DonationReceivedEvent(donation.getCommand(), donation.getMcName(), uuid, donation.getPackageName(), donation.getPackagePrice(), donation.getCouponDiscount());
                 instance.getProxy().getPluginManager().callEvent(event);

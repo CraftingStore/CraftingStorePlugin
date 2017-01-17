@@ -3,11 +3,8 @@ package net.craftingstore.bukkit;
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.bukkit.config.Config;
 import net.craftingstore.bukkit.timers.DonationCheckTimer;
-import net.craftingstore.utils.HttpUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.util.logging.Level;
 
