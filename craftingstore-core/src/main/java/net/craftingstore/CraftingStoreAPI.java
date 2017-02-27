@@ -18,7 +18,7 @@ public class CraftingStoreAPI {
 
     }
 
-    public static final String API_URL = "http://api.craftingstore.net/v2/";
+    public static final String API_URL = "https://api.craftingstore.net/v2/";
 
     private Gson gson = new Gson();
 
