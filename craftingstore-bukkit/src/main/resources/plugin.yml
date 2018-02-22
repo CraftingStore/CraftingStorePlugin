@@ -1,5 +1,10 @@
 name: CraftingStore
 main: net.craftingstore.bukkit.CraftingStoreBukkit
 version: 1.0.1-SNAPSHOT
-authors: [Tim-NL, Mrten]
+authors: [Tim_kwakman, Mrten]
 prefix: CraftingStore
+commands:
+  craftingstore:
+    description: CraftingStore command
+    usage: /craftingstore
+    aliases: [cs]
