@@ -18,13 +18,13 @@ public class CraftingStoreAPI {
 
     }
 
-    public static final String API_URL = "https://api.craftingstore.net/v2/";
+    public static final String API_URL = "https://api.craftingstore.net/v3/";
 
     private Gson gson = new Gson();
 
     public boolean checkKey(String key) throws Exception {
-        String url = API_URL + key + "/check";
-        String json = HttpUtils.getJson(url);
+        String url = API_URL + "check";
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<Result>>() {}.getType();
         Root<Result> result = gson.fromJson(json, type);
@@ -36,11 +36,11 @@ public class CraftingStoreAPI {
     }
 
     public Donation[] getQueries(String key, boolean remove) throws Exception {
-        String url = API_URL + key + "/queries";
+        String url = API_URL + "queries";
         if (remove) {
             url = url + "/remove";
         }
-        String json = HttpUtils.getJson(url);
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<Donation[]>>() {}.getType();
         Root<Donation[]> donations = gson.fromJson(json, type);
@@ -48,8 +48,8 @@ public class CraftingStoreAPI {
     }
 
     public Payment[] getPayments(String key) throws Exception {
-        String url = API_URL + key + "/payments";
-        String json = HttpUtils.getJson(url);
+        String url = API_URL + "payments";
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<Payment[]>>() {}.getType();
         Root<Payment[]> payments = gson.fromJson(json, type);
@@ -57,8 +57,8 @@ public class CraftingStoreAPI {
     }
 
     public Package[] getPackages(String key) throws Exception {
-        String url = API_URL + key + "/packages";
-        String json = HttpUtils.getJson(url);
+        String url = API_URL + "packages";
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<Package[]>>() {}.getType();
         Root<Package[]> packages = gson.fromJson(json, type);

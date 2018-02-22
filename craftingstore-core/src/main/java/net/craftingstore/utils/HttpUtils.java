@@ -2,35 +2,37 @@ package net.craftingstore.utils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 
 public class HttpUtils {
 
-    public static String getJson(String urlString) throws Exception {
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
-        try {
-            URL url = new URL(urlString);
-            inputStreamReader = new InputStreamReader(url.openStream());
-            bufferedReader = new BufferedReader(inputStreamReader);
+    public static String getJson(String urlString, String apikey) throws Exception {
 
-            StringBuilder buffer = new StringBuilder();
-            int read;
-            char[] chars = new char[1024];
-            while ((read = bufferedReader.read(chars)) != -1) {
-                buffer.append(chars, 0, read);
-            }
+        String data = URLEncoder.encode("token", "UTF-8") + "=" + URLEncoder.encode(apikey, "UTF-8");
 
-            return buffer.toString();
-        } finally {
-            if (bufferedReader != null) {
-                bufferedReader.close();
-            }
+        URL url = new URL(urlString);
+        URLConnection conn = url.openConnection();
+        conn.setDoOutput(true);
+        OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+        wr.write(data);
+        wr.flush();
 
-            if (inputStreamReader != null) {
-                inputStreamReader.close();
-            }
+        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+        StringBuilder buffer = new StringBuilder();
+        int read;
+        char[] chars = new char[1024];
+        while ((read = rd.read(chars)) != -1) {
+            buffer.append(chars, 0, read);
         }
+
+        wr.close();
+        rd.close();
+
+        return buffer.toString();
     }
 
 }
