@@ -6,5 +6,4 @@ prefix: CraftingStore
 commands:
   craftingstore:
     description: CraftingStore command
-    usage: /craftingstore
     aliases: [cs]

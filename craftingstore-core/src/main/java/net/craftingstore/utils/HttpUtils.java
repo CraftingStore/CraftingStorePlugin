@@ -9,9 +9,12 @@ import java.net.URLEncoder;
 
 public class HttpUtils {
 
-    public static String getJson(String urlString, String apikey) throws Exception {
+    public static String getJson(String urlString, String apiKey, String Commands) throws Exception {
 
-        String data = URLEncoder.encode("token", "UTF-8") + "=" + URLEncoder.encode(apikey, "UTF-8");
+        String data = URLEncoder.encode("token", "UTF-8") + "=" + URLEncoder.encode(apiKey, "UTF-8");
+        if (Commands != null) {
+            data += "&" + URLEncoder.encode("removeIds", "UTF-8") + "=" + URLEncoder.encode(Commands, "UTF-8");
+        }
 
         URL url = new URL(urlString);
         URLConnection conn = url.openConnection();

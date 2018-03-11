@@ -48,7 +48,7 @@ public class CraftingStoreBungee extends Plugin {
             interval = 60;
         }
 
-        getProxy().getScheduler().schedule(this, new DonationCheckTimer(this), interval, TimeUnit.SECONDS);
+        getProxy().getScheduler().schedule(this, new DonationCheckTimer(this), 10, interval, TimeUnit.SECONDS);
     }
 
     @Override

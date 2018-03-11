@@ -4,6 +4,7 @@ import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.bukkit.commands.CraftingStoreCommand;
 import net.craftingstore.bukkit.config.Config;
 import net.craftingstore.bukkit.timers.DonationCheckTimer;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,10 +20,12 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
     private Config config;
     private String key;
+    public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
 
     @Override
     public void onEnable() {
         instance = this;
+        config = new Config("config.yml", this);
 
         // Register commands
         this.getCommand("craftingstore").setExecutor(new CraftingStoreCommand());
@@ -59,8 +62,6 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
     public void refreshKey() {
 
-        config = new Config("config.yml", this);
-
         String key = getConfig().getString("api-key");
         this.key = key;
 
@@ -80,6 +81,10 @@ public class CraftingStoreBukkit extends JavaPlugin {
             getLogger().log(Level.SEVERE, "An error occurred while checking the API key.", e);
             this.key = null;
             return;
+        }
+
+        if (this.key != null) {
+            getLogger().log(Level.INFO, "The API key is valid, your store will now accept new commands.");
         }
     }
 

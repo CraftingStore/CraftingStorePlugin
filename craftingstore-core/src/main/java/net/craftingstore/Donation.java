@@ -9,10 +9,16 @@ public class Donation {
     @SerializedName("mc_name")
     private String username;
 
+    @SerializedName("id")
+    private Integer id;
+
     private String uuid;
 
     @SerializedName("package_name")
     private String packageName;
+
+    @SerializedName("require_online")
+    private String requireOnline;
 
     @SerializedName("package_price")
     private int packagePrice;
@@ -22,6 +28,10 @@ public class Donation {
 
     public String getCommand() {
         return command;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public String getMcName() {
@@ -34,6 +44,10 @@ public class Donation {
 
     public String getPackageName() {
         return packageName;
+    }
+
+    public Boolean getRequireOnline() {
+        return Boolean.valueOf(requireOnline);
     }
 
     public int getPackagePrice() {
