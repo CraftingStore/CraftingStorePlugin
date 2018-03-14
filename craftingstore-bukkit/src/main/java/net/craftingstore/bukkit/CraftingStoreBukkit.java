@@ -3,7 +3,12 @@ package net.craftingstore.bukkit;
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.bukkit.commands.CraftingStoreCommand;
 import net.craftingstore.bukkit.config.Config;
+import net.craftingstore.bukkit.hooks.DonationPlaceholders;
+import net.craftingstore.bukkit.models.QueryCache;
 import net.craftingstore.bukkit.timers.DonationCheckTimer;
+import net.craftingstore.bukkit.timers.RecentPaymentsTimer;
+import net.craftingstore.bukkit.timers.TopDonatorTimer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,12 +25,14 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
     private Config config;
     private String key;
+    private QueryCache queryCache;
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
 
     @Override
     public void onEnable() {
         instance = this;
         config = new Config("config.yml", this);
+        queryCache = new QueryCache();
 
         // Register commands
         this.getCommand("craftingstore").setExecutor(new CraftingStoreCommand());
@@ -42,7 +49,14 @@ public class CraftingStoreBukkit extends JavaPlugin {
             interval = 1200;
         }
 
-        new DonationCheckTimer(this).runTaskTimerAsynchronously(this, interval, interval);
+        new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval); // Run after 6 seconds
+        new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 5 * 20); // Run every 5 minutes
+        new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 5 * 20); // Run every 5 minutes
+
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            new DonationPlaceholders(instance);
+            instance.getLogger().log(Level.INFO, "Hooked with PlaceholderAPI");
+        }
     }
 
     @Override
@@ -92,4 +106,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
         return key;
     }
 
+    public QueryCache getQueryCache() {
+        return queryCache;
+    }
 }

@@ -71,4 +71,12 @@ public class CraftingStoreAPI {
         return packages.getResult();
     }
 
+    public TopDonator[] getTopDonators(String key) throws Exception {
+        String url = API_URL + "toppayments";
+        String json = HttpUtils.getJson(url, key, null);
+
+        Type type = new TypeToken<Root<TopDonator[]>>() {}.getType();
+        Root<TopDonator[]> donators = gson.fromJson(json, type);
+        return donators.getResult();
+    }
 }

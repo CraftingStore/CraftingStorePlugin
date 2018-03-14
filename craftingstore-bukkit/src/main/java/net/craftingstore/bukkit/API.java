@@ -1,7 +1,6 @@
 package net.craftingstore.bukkit;
 
 import net.craftingstore.CraftingStoreAPI;
-import net.craftingstore.utils.HttpUtils;
 
 import java.util.logging.Level;
 

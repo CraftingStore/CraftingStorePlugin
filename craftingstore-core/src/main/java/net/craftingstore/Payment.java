@@ -13,6 +13,12 @@ public class Payment {
     private String coupon;
     private String price;
 
+    @SerializedName("package")
+    private int packageId;
+
+    @SerializedName("package_name")
+    private String packageName;
+
     public String getUsername() {
         return username;
     }
@@ -37,4 +43,11 @@ public class Payment {
         return price;
     }
 
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public int getPackageId() {
+        return packageId;
+    }
 }

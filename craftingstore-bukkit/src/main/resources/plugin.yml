@@ -1,8 +1,9 @@
 name: CraftingStore
 main: net.craftingstore.bukkit.CraftingStoreBukkit
-version: 1.0.1-SNAPSHOT
-authors: [Tim_kwakman, Mrten]
+version: 1.1.0
+authors: [Tim_kwakman, Mrten, thijs_a]
 prefix: CraftingStore
+softdepend: [PlaceholderAPI]
 commands:
   craftingstore:
     description: CraftingStore command

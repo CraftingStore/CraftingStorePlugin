@@ -1,17 +1,14 @@
 package net.craftingstore.bukkit.timers;
 
-import com.google.gson.JsonArray;
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Donation;
 import net.craftingstore.bukkit.CraftingStoreBukkit;
 import net.craftingstore.bukkit.events.DonationReceivedEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
