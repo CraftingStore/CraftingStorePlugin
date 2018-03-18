@@ -43,16 +43,6 @@ public class CraftingStoreBukkit extends JavaPlugin {
             return;
         }
 
-        int interval = getConfig().getInt("interval") * 20;
-        if (interval < 1200) {
-            getLogger().log(Level.WARNING, "The interval cannot be lower than 60 seconds. An interval of 60 seconds will be used.");
-            interval = 1200;
-        }
-
-        new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval); // Run after 6 seconds
-        new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 5 * 20); // Run every 5 minutes
-        new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 5 * 20); // Run every 5 minutes
-
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new DonationPlaceholders(instance);
             instance.getLogger().log(Level.INFO, "Hooked with PlaceholderAPI");
@@ -99,6 +89,17 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
         if (this.key != null) {
             getLogger().log(Level.INFO, "The API key is valid, your store will now accept new commands.");
+
+            int interval = getConfig().getInt("interval") * 20;
+            if (interval < 1200) {
+                getLogger().log(Level.WARNING, "The interval cannot be lower than 60 seconds. An interval of 60 seconds will be used.");
+                interval = 1200;
+            }
+
+            Bukkit.getScheduler().cancelTasks(this);
+            new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval); // Run after 6 seconds
+            new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 5 * 20); // Run every 5 minutes
+            new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 5 * 20); // Run every 5 minutes
         }
     }
 
