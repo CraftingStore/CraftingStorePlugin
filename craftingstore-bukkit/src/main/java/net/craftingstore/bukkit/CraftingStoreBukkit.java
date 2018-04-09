@@ -27,7 +27,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
     private Config config;
     private String key;
     private Boolean debug;
-    private Boolean useRealTimeSockets;
+    private Boolean useRealTimeSockets = true;
     private Boolean premiumStore = false;
     private QueryCache queryCache;
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
@@ -39,7 +39,6 @@ public class CraftingStoreBukkit extends JavaPlugin {
         queryCache = new QueryCache();
 
         // Get config items.
-        this.useRealTimeSockets = getConfig().getBoolean("instant-payments");
         this.debug = getConfig().getBoolean("debug");
 
         // Register commands
@@ -108,7 +107,6 @@ public class CraftingStoreBukkit extends JavaPlugin {
             return;
         }
 
-
         if (this.key != null) {
             getLogger().log(Level.INFO, "The API key is valid, your store will now accept new commands.");
 
@@ -119,15 +117,11 @@ public class CraftingStoreBukkit extends JavaPlugin {
             }
 
             // Use check if we should use realtime sockets (only if this is a premium store)
-            if (this.useRealTimeSockets) {
-                if (this.premiumStore) {
-                    new WebSocketUtils(key);
-                    interval = 60 * 25 * 20; // Set interval to 25 minutes, as backup method.
-                    if (this.debug) {
-                        System.out.println("[CraftingStore-Debug] realtime payment socket enabled!");
-                    }
-                } else {
-                    getLogger().log(Level.SEVERE, "You enabled the realtime socket connection, but your store is on the free plan. Please disable this option!");
+            if (useRealTimeSockets && premiumStore) {
+                new WebSocketUtils(key);
+                interval = 60 * 25 * 20; // Set interval to 25 minutes, as backup method.
+                if (this.debug) {
+                    System.out.println("[CraftingStore-Debug] realtime payment socket enabled!");
                 }
             }
 
