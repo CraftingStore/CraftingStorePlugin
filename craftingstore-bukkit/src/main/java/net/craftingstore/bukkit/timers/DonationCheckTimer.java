@@ -22,6 +22,11 @@ public class DonationCheckTimer extends BukkitRunnable {
 
     public void run() {
         try {
+
+            if (CraftingStoreBukkit.getInstance().getDebug()) {
+                System.out.println("[CraftingStore-Debug] Checking for donations!");
+            }
+
             ArrayList<Integer> commands = new ArrayList<Integer>();
 
             Donation[] donations = CraftingStoreAPI.getInstance().getQueries(CraftingStoreBukkit.getInstance().getKey());

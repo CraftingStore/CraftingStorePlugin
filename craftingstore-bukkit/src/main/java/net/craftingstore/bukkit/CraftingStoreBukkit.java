@@ -8,6 +8,7 @@ import net.craftingstore.bukkit.models.QueryCache;
 import net.craftingstore.bukkit.timers.DonationCheckTimer;
 import net.craftingstore.bukkit.timers.RecentPaymentsTimer;
 import net.craftingstore.bukkit.timers.TopDonatorTimer;
+import net.craftingstore.bukkit.utils.WebSocketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,6 +26,9 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
     private Config config;
     private String key;
+    private Boolean debug;
+    private Boolean useRealTimeSockets;
+    private Boolean premiumStore = false;
     private QueryCache queryCache;
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
 
@@ -33,6 +37,10 @@ public class CraftingStoreBukkit extends JavaPlugin {
         instance = this;
         config = new Config("config.yml", this);
         queryCache = new QueryCache();
+
+        // Get config items.
+        this.useRealTimeSockets = getConfig().getBoolean("instant-payments");
+        this.debug = getConfig().getBoolean("debug");
 
         // Register commands
         this.getCommand("craftingstore").setExecutor(new CraftingStoreCommand());
@@ -67,6 +75,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
     public void refreshKey() {
 
         String key = getConfig().getString("api-key");
+
         this.key = key;
 
         if (key.length() == 0) {
@@ -75,6 +84,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
             return;
         }
 
+        // Check key
         try {
             if (!CraftingStoreAPI.getInstance().checkKey(key)) {
                 getLogger().log(Level.SEVERE, "Your API key is invalid. The plugin will not work until your API key is valid.");
@@ -87,6 +97,18 @@ public class CraftingStoreBukkit extends JavaPlugin {
             return;
         }
 
+        // Check store type.
+        try {
+            if (CraftingStoreAPI.getInstance().storePremium(key)) {
+                premiumStore = true;
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "An error occurred while checking the store status.", e);
+            this.key = null;
+            return;
+        }
+
+
         if (this.key != null) {
             getLogger().log(Level.INFO, "The API key is valid, your store will now accept new commands.");
 
@@ -96,15 +118,32 @@ public class CraftingStoreBukkit extends JavaPlugin {
                 interval = 1200;
             }
 
+            // Use check if we should use realtime sockets (only if this is a premium store)
+            if (this.useRealTimeSockets) {
+                if (this.premiumStore) {
+                    new WebSocketUtils(key);
+                    interval = 60 * 25 * 20; // Set interval to 25 minutes, as backup method.
+                    if (this.debug) {
+                        System.out.println("[CraftingStore-Debug] realtime payment socket enabled!");
+                    }
+                } else {
+                    getLogger().log(Level.SEVERE, "You enabled the realtime socket connection, but your store is on the free plan. Please disable this option!");
+                }
+            }
+
             Bukkit.getScheduler().cancelTasks(this);
             new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval); // Run after 6 seconds
-            new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 5 * 20); // Run every 5 minutes
-            new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 5 * 20); // Run every 5 minutes
+            new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 8 * 20); // Run every 5 minutes
+            new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 8 * 20); // Run every 5 minutes
         }
     }
 
     public String getKey() {
         return key;
+    }
+
+    public Boolean getDebug() {
+        return debug;
     }
 
     public QueryCache getQueryCache() {

@@ -31,6 +31,15 @@ public class CraftingStoreAPI {
         return result.getResult().getSuccess();
     }
 
+    public boolean storePremium(String key) throws Exception {
+        String url = API_URL + "check";
+        String json = HttpUtils.getJson(url, key, null);
+
+        Type type = new TypeToken<Root<Result>>() {}.getType();
+        Root<Result> result = gson.fromJson(json, type);
+        return result.getResult().getPremium();
+    }
+
     public Donation[] getQueries(String key) throws Exception {
         return getQueries(key, false);
     }
