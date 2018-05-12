@@ -28,7 +28,9 @@ public class CraftingStoreBukkit extends JavaPlugin {
     private String key;
     private Boolean debug;
     private Boolean useRealTimeSockets = true;
-    private Boolean premiumStore = false;
+    private Boolean useSockets = false;
+    private String socketURL;
+
     private QueryCache queryCache;
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
 
@@ -98,9 +100,11 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
         // Check store type.
         try {
-            if (CraftingStoreAPI.getInstance().storePremium(key)) {
-                premiumStore = true;
+            socketURL = CraftingStoreAPI.getInstance().storeCheck(key);
+            if (socketURL != null && !socketURL.equals("")) {
+                useSockets = true;
             }
+
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "An error occurred while checking the store status.", e);
             this.key = null;
@@ -117,18 +121,19 @@ public class CraftingStoreBukkit extends JavaPlugin {
             }
 
             // Use check if we should use realtime sockets (only if this is a premium store)
-            if (useRealTimeSockets && premiumStore) {
-                new WebSocketUtils(key);
-                interval = 60 * 25 * 20; // Set interval to 25 minutes, as backup method.
+            if (useRealTimeSockets && useSockets) {
+                new WebSocketUtils(key, socketURL);
+                interval = 60 * 60 * 20; // Set interval to 60 minutes, as backup method.
                 if (this.debug) {
-                    System.out.println("[CraftingStore-Debug] realtime payment socket enabled!");
+                    getLogger().log(Level.INFO, "Realtime payment socket enabled!");
+                    getLogger().log(Level.INFO, "Using socket address: " + this.socketURL);
                 }
             }
 
             Bukkit.getScheduler().cancelTasks(this);
             new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval); // Run after 6 seconds
-            new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 8 * 20); // Run every 5 minutes
-            new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 8 * 20); // Run every 5 minutes
+            new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 8 * 20); // Run every 8 minutes
+            new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 8 * 20); // Run every 8 minutes
         }
     }
 

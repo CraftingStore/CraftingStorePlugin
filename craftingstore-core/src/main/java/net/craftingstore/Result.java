@@ -3,8 +3,8 @@ package net.craftingstore;
 public class Result {
 
     private String status;
+    private String socket;
     private boolean success;
-    private boolean premium;
 
     public String getStatus() {
         return status;
@@ -14,8 +14,8 @@ public class Result {
         return success;
     }
 
-    public boolean getPremium() {
-        return premium;
+    public String getSocket() {
+        return socket;
     }
 
 }
