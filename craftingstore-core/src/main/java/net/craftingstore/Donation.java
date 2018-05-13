@@ -6,7 +6,7 @@ public class Donation {
 
     private String command;
 
-    @SerializedName("mc_name")
+    @SerializedName("mcName")
     private String username;
 
     @SerializedName("id")
@@ -14,16 +14,16 @@ public class Donation {
 
     private String uuid;
 
-    @SerializedName("package_name")
+    @SerializedName("packageName")
     private String packageName;
 
-    @SerializedName("require_online")
+    @SerializedName("requireOnline")
     private String requireOnline;
 
-    @SerializedName("package_price")
+    @SerializedName("packagePrice")
     private int packagePrice;
 
-    @SerializedName("coupon_discount")
+    @SerializedName("couponDiscount")
     private int couponDiscount;
 
     public String getCommand() {

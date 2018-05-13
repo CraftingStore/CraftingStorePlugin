@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class Payment {
 
-    @SerializedName("player_name")
+    @SerializedName("playerName")
     private String username;
 
     private String gateway;
@@ -13,10 +13,10 @@ public class Payment {
     private String coupon;
     private String price;
 
-    @SerializedName("package")
+    @SerializedName("packageId")
     private int packageId;
 
-    @SerializedName("package_name")
+    @SerializedName("packageName")
     private String packageName;
 
     public String getUsername() {

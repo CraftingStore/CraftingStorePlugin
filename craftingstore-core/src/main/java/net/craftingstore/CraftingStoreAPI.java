@@ -14,42 +14,35 @@ public class CraftingStoreAPI {
         return instance;
     }
 
-    protected CraftingStoreAPI() {
+    private CraftingStoreAPI() {
 
     }
 
-    public static final String API_URL = "https://api.craftingstore.net/v3/";
+    public static final String API_URL = "https://api.craftingstore.net/v4/";
 
     private Gson gson = new Gson();
 
     public boolean checkKey(String key) throws Exception {
-        String url = API_URL + "check";
-        String json = HttpUtils.getJson(url, key, null);
+        String url = API_URL + "validateToken";
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<Result>>() {}.getType();
         Root<Result> result = gson.fromJson(json, type);
-        return result.getResult().getSuccess();
+        return result.getSuccess();
     }
 
-    public String storeCheck(String key) throws Exception {
-        String url = API_URL + "check";
-        String json = HttpUtils.getJson(url, key, null);
+    public Socket getSocket(String key) throws Exception {
+        String url = API_URL + "socket";
+        String json = HttpUtils.getJson(url, key);
 
-        Type type = new TypeToken<Root<Result>>() {}.getType();
-        Root<Result> result = gson.fromJson(json, type);
-        return result.getResult().getSocket();
+        Type type = new TypeToken<Root<Socket>>() {}.getType();
+        Root<Socket> socket = gson.fromJson(json, type);
+        return socket.getResult();
     }
 
     public Donation[] getQueries(String key) throws Exception {
-        return getQueries(key, false);
-    }
-
-    public Donation[] getQueries(String key, boolean remove) throws Exception {
-        String url = API_URL + "queries";
-        if (remove) {
-            url = url + "/remove";
-        }
-        String json = HttpUtils.getJson(url, key, null);
+        String url = API_URL + "queue";
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<Donation[]>>() {}.getType();
         Root<Donation[]> donations = gson.fromJson(json, type);
@@ -59,12 +52,12 @@ public class CraftingStoreAPI {
     public void completeCommands(String key, String commandIds) throws Exception {
         String url = API_URL + "queries/complete";
 
-        String json = HttpUtils.getJson(url, key, commandIds);
+        HttpUtils.postJson(url, key, commandIds);
     }
 
     public Payment[] getPayments(String key) throws Exception {
-        String url = API_URL + "payments";
-        String json = HttpUtils.getJson(url, key, null);
+        String url = API_URL + "buyers/recent";
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<Payment[]>>() {}.getType();
         Root<Payment[]> payments = gson.fromJson(json, type);
@@ -73,7 +66,7 @@ public class CraftingStoreAPI {
 
     public Package[] getPackages(String key) throws Exception {
         String url = API_URL + "packages";
-        String json = HttpUtils.getJson(url, key, null);
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<Package[]>>() {}.getType();
         Root<Package[]> packages = gson.fromJson(json, type);
@@ -81,8 +74,8 @@ public class CraftingStoreAPI {
     }
 
     public TopDonator[] getTopDonators(String key) throws Exception {
-        String url = API_URL + "toppayments";
-        String json = HttpUtils.getJson(url, key, null);
+        String url = API_URL + "buyers/top";
+        String json = HttpUtils.getJson(url, key);
 
         Type type = new TypeToken<Root<TopDonator[]>>() {}.getType();
         Root<TopDonator[]> donators = gson.fromJson(json, type);

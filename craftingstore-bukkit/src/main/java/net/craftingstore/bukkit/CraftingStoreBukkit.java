@@ -1,6 +1,7 @@
 package net.craftingstore.bukkit;
 
 import net.craftingstore.CraftingStoreAPI;
+import net.craftingstore.Socket;
 import net.craftingstore.bukkit.commands.CraftingStoreCommand;
 import net.craftingstore.bukkit.config.Config;
 import net.craftingstore.bukkit.hooks.DonationPlaceholders;
@@ -27,9 +28,6 @@ public class CraftingStoreBukkit extends JavaPlugin {
     private Config config;
     private String key;
     private Boolean debug;
-    private Boolean useRealTimeSockets = true;
-    private Boolean useSockets = false;
-    private String socketURL;
 
     private QueryCache queryCache;
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
@@ -76,6 +74,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
     public void refreshKey() {
 
         String key = getConfig().getString("api-key");
+        Integer additionalTimerInterval =  60 * 10 * 20; // minutes.
 
         this.key = key;
 
@@ -98,16 +97,20 @@ public class CraftingStoreBukkit extends JavaPlugin {
             return;
         }
 
-        // Check store type.
+        // Check if we should enable sockets.
+        Integer socketsProvider;
+        Boolean socketsEnabled;
+        String socketsUrl;
+
         try {
-            socketURL = CraftingStoreAPI.getInstance().storeCheck(key);
-            if (socketURL != null && !socketURL.equals("")) {
-                useSockets = true;
-            }
+            Socket socket = CraftingStoreAPI.getInstance().getSocket(key);
+
+            socketsUrl = socket.getSocketUrl();
+            socketsEnabled = socket.getSocketAllowed();
+            socketsProvider = socket.getSocketProvider();
 
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "An error occurred while checking the store status.", e);
-            this.key = null;
             return;
         }
 
@@ -121,19 +124,27 @@ public class CraftingStoreBukkit extends JavaPlugin {
             }
 
             // Use check if we should use realtime sockets (only if this is a premium store)
-            if (useRealTimeSockets && useSockets) {
-                new WebSocketUtils(key, socketURL);
-                interval = 60 * 60 * 20; // Set interval to 60 minutes, as backup method.
+            if (socketsEnabled) {
+
+                // Enable socket connection.
+                new WebSocketUtils(key, socketsUrl, socketsProvider);
+
+                // Set interval to 35 minutes, as backup method.
+                interval = 60 * 35 * 20;
+
+                // Set interval to 50 minutes, as backup method.
+                additionalTimerInterval = 60 * 50 * 20;
+
                 if (this.debug) {
-                    getLogger().log(Level.INFO, "Realtime payment socket enabled!");
-                    getLogger().log(Level.INFO, "Using socket address: " + this.socketURL);
+                    getLogger().log(Level.INFO, "Instant payments enabled, using sockets. [URL: " + socketsUrl + " | Provider: " + socketsProvider + "]");
                 }
             }
 
             Bukkit.getScheduler().cancelTasks(this);
-            new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval); // Run after 6 seconds
-            new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 8 * 20); // Run every 8 minutes
-            new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, 60 * 8 * 20); // Run every 8 minutes
+
+            new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval);
+            new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
+            new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
         }
     }
 
