@@ -50,7 +50,7 @@ public class CraftingStoreAPI {
     }
 
     public void completeCommands(String key, String commandIds) throws Exception {
-        String url = API_URL + "queries/complete";
+        String url = API_URL + "queue/markComplete";
 
         HttpUtils.postJson(url, key, commandIds);
     }

@@ -44,6 +44,10 @@ public class DonationCheckTimer extends BukkitRunnable {
 
                 if (!event.isCancelled()) {
 
+                    if (CraftingStoreBukkit.getInstance().getDebug()) {
+                        CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Processing command: '" + event.getCommand() + "'");
+                    }
+
                     if (requireOnline && Bukkit.getPlayerExact(donation.getMcName()) != null) {
 
                         commands.add(donation.getId());
@@ -62,12 +66,14 @@ public class DonationCheckTimer extends BukkitRunnable {
                             }
                         });
                     }
-
                 }
             }
 
             // Register commands as done.
             if (commands.size() > 0) {
+                if (CraftingStoreBukkit.getInstance().getDebug()) {
+                    CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Setting commands to completed...");
+                }
                 CraftingStoreAPI.getInstance().completeCommands(CraftingStoreBukkit.getInstance().getKey(), commands.toString());
             }
 

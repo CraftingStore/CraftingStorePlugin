@@ -46,7 +46,7 @@ public class HttpUtils {
 
     public static void postJson(String urlString, String apiKey, String Commands) throws Exception {
 
-        String data = URLEncoder.encode("token", "UTF-8") + "=" + URLEncoder.encode(apiKey, "UTF-8");
+        String data = "";
         if (Commands != null) {
             data += "&" + URLEncoder.encode("removeIds", "UTF-8") + "=" + URLEncoder.encode(Commands, "UTF-8");
         }
@@ -60,7 +60,17 @@ public class HttpUtils {
         wr.write(data);
         wr.flush();
 
+        BufferedReader rd = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+        StringBuilder buffer = new StringBuilder();
+        int read;
+        char[] chars = new char[1024];
+        while ((read = rd.read(chars)) != -1) {
+            buffer.append(chars, 0, read);
+        }
+
         wr.close();
+        rd.close();
     }
 
 }
