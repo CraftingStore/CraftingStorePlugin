@@ -2,7 +2,6 @@ package net.craftingstore.bungee.timers;
 
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Donation;
-import net.craftingstore.bukkit.CraftingStoreBukkit;
 import net.craftingstore.bungee.CraftingStoreBungee;
 import net.craftingstore.bungee.events.DonationReceivedEvent;
 import net.md_5.bungee.api.ProxyServer;
@@ -23,6 +22,10 @@ public class DonationCheckTimer implements Runnable {
     public void run() {
         try {
             ArrayList<Integer> commands = new ArrayList<Integer>();
+
+            if (CraftingStoreBungee.getInstance().getDebug()) {
+                CraftingStoreBungee.getInstance().getLogger().log(Level.INFO, "Running donation check timer.");
+            }
 
             Donation[] donations = CraftingStoreAPI.getInstance().getQueries(CraftingStoreBungee.getInstance().getKey());
 
