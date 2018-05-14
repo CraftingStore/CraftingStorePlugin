@@ -115,7 +115,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
         }
 
         if (this.key != null) {
-            getLogger().log(Level.INFO, "The API key is valid, your store will now accept new commands.");
+            getLogger().log(Level.INFO, "Your key is valid, and you are ready to accept donations!");
 
             int interval = getConfig().getInt("interval") * 20;
             if (interval < 1200) {
