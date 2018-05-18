@@ -1,10 +1,17 @@
 package net.craftingstore;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Socket {
 
     private boolean socketAllowed;
     private Integer socketSupplier;
     private String socketUrl;
+    private String socketFallbackUrl;
+
+    private String pusherApi;
+    private String pusherLocation;
+
 
     public boolean getSocketAllowed() {
         return socketAllowed;
@@ -16,6 +23,21 @@ public class Socket {
 
     public Integer getSocketProvider() {
         return socketSupplier;
+    }
+
+    @SerializedName("pusherLocation")
+    public String getPusherLocation() {
+        return pusherLocation;
+    }
+
+    @SerializedName("pusherApi")
+    public String getPusherApi() {
+        return pusherApi;
+    }
+
+    @SerializedName("socketFallbackUrl")
+    public String getSocketFallbackUrl() {
+        return socketFallbackUrl;
     }
 
 }

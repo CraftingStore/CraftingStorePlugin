@@ -102,12 +102,19 @@ public class CraftingStoreBukkit extends JavaPlugin {
         Boolean socketsEnabled;
         String socketsUrl;
 
+        String socketPusherApi;
+        String socketPusherLocation;
+        String socketFallbackUrl;
+
         try {
             Socket socket = CraftingStoreAPI.getInstance().getSocket(key);
 
             socketsUrl = socket.getSocketUrl();
             socketsEnabled = socket.getSocketAllowed();
             socketsProvider = socket.getSocketProvider();
+            socketPusherApi = socket.getPusherApi();
+            socketPusherLocation = socket.getPusherLocation();
+            socketFallbackUrl = socket.getSocketFallbackUrl();
 
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "An error occurred while checking the store status.", e);
@@ -127,7 +134,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
             if (socketsEnabled) {
 
                 // Enable socket connection.
-                new WebSocketUtils(key, socketsUrl, socketsProvider);
+                new WebSocketUtils(key, socketsUrl, socketsProvider, socketPusherApi, socketPusherLocation, socketFallbackUrl);
 
                 // Set interval to 35 minutes, as backup method.
                 interval = 60 * 35 * 20;
