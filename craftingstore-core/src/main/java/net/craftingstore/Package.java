@@ -7,6 +7,7 @@ public class Package {
     private Integer category;
     private String minecraftIconName;
     private String ingameDescription;
+    private String url;
 
     public int getId() {
         return id;
@@ -28,4 +29,7 @@ public class Package {
         return minecraftIconName;
     }
 
+    public String getUrl() {
+        return url;
+    }
 }

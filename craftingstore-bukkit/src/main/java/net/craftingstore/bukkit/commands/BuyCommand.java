@@ -12,6 +12,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.logging.Level;
+
 public class BuyCommand implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -25,11 +27,10 @@ public class BuyCommand implements CommandExecutor {
         Integer categoryCount = categories.length;
         while(categoryCount > inventorySlots) {
             inventorySlots = inventorySlots + 9;
-            System.out.println("Now: " + inventorySlots);
         }
 
         // Create inventory
-        Inventory categoriesInventory = Bukkit.createInventory(null, inventorySlots, "Store Categories");
+        Inventory categoriesInventory = Bukkit.createInventory(null, inventorySlots, "CraftingStore: Categories");
 
         // Get player
         Player player = (Player) sender;
@@ -38,12 +39,11 @@ public class BuyCommand implements CommandExecutor {
 
         // Walk though categories to build inventory
         for (Category category : categories) {
-            System.out.println(category.getName());
 
             // Get material
             Material material = Material.getMaterial(category.getMinecraftIconName());
             if (material == null) {
-                material = Material.DIRT;
+                material = Material.CHEST;
             }
 
             // Set item meta.
@@ -56,7 +56,11 @@ public class BuyCommand implements CommandExecutor {
             loop++;
         }
 
-        // Open inventory
+        // Add inventory to our listener & open for player.
+        CraftingStoreBukkit.getInstance().getQueryCache().addInventory(categoriesInventory.getName());
+        if (CraftingStoreBukkit.getInstance().getDebug()) {
+            CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Added inventory to our storage. Name: " + categoriesInventory.getName());
+        }
         player.openInventory(categoriesInventory);
 
         return true;

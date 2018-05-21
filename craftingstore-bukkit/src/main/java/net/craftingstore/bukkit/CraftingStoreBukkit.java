@@ -1,6 +1,5 @@
 package net.craftingstore.bukkit;
 
-import net.craftingstore.Category;
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Socket;
 import net.craftingstore.bukkit.commands.BuyCommand;
@@ -15,9 +14,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.HashMap;
-import java.util.UUID;
 import java.util.logging.Level;
 
 public class CraftingStoreBukkit extends JavaPlugin {
@@ -31,6 +27,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
     private Config config;
     private String key;
     private Boolean debug;
+    private Boolean disableBuyCommand;
 
     private QueryCache queryCache;
 
@@ -44,10 +41,14 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
         // Get config items.
         this.debug = getConfig().getBoolean("debug");
+        this.disableBuyCommand = getConfig().getBoolean("disable-buy-command");
 
         // Register commands
         this.getCommand("craftingstore").setExecutor(new CraftingStoreCommand());
-        this.getCommand("buy").setExecutor(new BuyCommand());
+
+        if (!this.disableBuyCommand) {
+            this.getCommand("buy").setExecutor(new BuyCommand());
+        }
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
@@ -162,7 +163,9 @@ public class CraftingStoreBukkit extends JavaPlugin {
             new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
 
             // Get packages & categories, every 50 minutes.
-            new CategoriesTimer(this).runTaskTimerAsynchronously(this, 10, 60 * 50 * 20);
+            if (!this.disableBuyCommand) {
+                new CategoriesTimer(this).runTaskTimerAsynchronously(this, 10, 60 * 50 * 20);
+            }
         }
     }
 

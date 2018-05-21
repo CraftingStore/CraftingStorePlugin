@@ -4,6 +4,8 @@ import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.bukkit.CraftingStoreBukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.logging.Level;
+
 public class CategoriesTimer extends BukkitRunnable {
 
     private CraftingStoreBukkit instance;

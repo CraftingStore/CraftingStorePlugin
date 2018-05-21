@@ -13,6 +13,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
+import java.util.logging.Level;
+
 public class InventoryClickListener implements Listener {
 
     @EventHandler
@@ -28,7 +31,7 @@ public class InventoryClickListener implements Listener {
         ItemStack itemClicked = e.getCurrentItem();
 
         // Ignore if it's not our inventory.
-        if (!inventory.getTitle().equalsIgnoreCase("Store Categories")) {
+        if (!CraftingStoreBukkit.getInstance().getQueryCache().hasInventory(inventory.getName())) {
             return;
         }
 
@@ -47,23 +50,46 @@ public class InventoryClickListener implements Listener {
 
         // Set boolean if inventory is ready.
         Inventory packagesInventory = null;
-
         for (Category category : categories) {
-            
-            if (!itemClicked.getItemMeta().getDisplayName().equals(category.getName())) {
-                continue;
-            }
 
             // Get packages
             Package packages[] = category.getpackages();
 
+
+            // Check if we're already in the category menu, and if we are.. check the items.
+            if (inventory.getName().equals("CraftingStore: " + category.getName())) {
+                for (Package packageItem : packages) {
+                    if (itemClicked.getItemMeta().getDisplayName().equals(packageItem.getName())) {
+                        player.sendMessage(CraftingStoreBukkit.getInstance().prefix + "You can buy \"" + packageItem.getName() + "\" by clicking on this link: " + packageItem.getUrl());
+                        player.closeInventory();
+                        if (CraftingStoreBukkit.getInstance().getDebug()) {
+                            CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Removed inventory from our storage. Name: " + inventory.getName());
+                        }
+                        CraftingStoreBukkit.getInstance().getQueryCache().removeInventory(inventory.getName());
+                        return;
+                    }
+                }
+            }
+
+            // We are in the category selection, if one of them matches this category, go though.
+            if (!itemClicked.getItemMeta().getDisplayName().equals(category.getName())) {
+                continue;
+            }
+
+            // Calculate inventory size.
             Integer packageCount = packages.length;
             while (packageCount > inventorySlots) {
                 inventorySlots = inventorySlots + 9;
             }
 
             // Create inventory
-            packagesInventory = Bukkit.createInventory(null, inventorySlots, "Category " + category.getName());
+            packagesInventory = Bukkit.createInventory(null, inventorySlots, "CraftingStore: " + category.getName());
+
+            // Add inventory to our data model.
+            if (CraftingStoreBukkit.getInstance().getDebug()) {
+                CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Added inventory to our storage. Name: " + packagesInventory.getName());
+            }
+            CraftingStoreBukkit.getInstance().getQueryCache().addInventory(packagesInventory.getName());
 
             Integer loop = 0;
             for (Package packageItem : packages) {
@@ -71,13 +97,17 @@ public class InventoryClickListener implements Listener {
                 // Get material
                 Material material = Material.getMaterial(packageItem.getMinecraftIconName());
                 if (material == null) {
-                    material = Material.DIRT;
+                    material = Material.PAPER;
                 }
 
                 // Set item meta.
                 ItemStack item = new ItemStack(material, 1);
                 ItemMeta im = item.getItemMeta();
                 im.setDisplayName(packageItem.getName());
+                ArrayList<String> lore = new ArrayList<String>();
+                lore.add(packageItem.getIngameDescription());
+                im.setLore(lore);
+
                 item.setItemMeta(im);
 
                 packagesInventory.setItem(loop, item);
@@ -90,7 +120,11 @@ public class InventoryClickListener implements Listener {
             return;
         }
 
-        // Close old inventory.
+        // Close old inventory, and remove it from our storage.
+        if (CraftingStoreBukkit.getInstance().getDebug()) {
+            CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Removed inventory from our storage. Name: " + inventory.getName());
+        }
+        CraftingStoreBukkit.getInstance().getQueryCache().removeInventory(inventory.getName());
         player.closeInventory();
 
         // Open inventory!
