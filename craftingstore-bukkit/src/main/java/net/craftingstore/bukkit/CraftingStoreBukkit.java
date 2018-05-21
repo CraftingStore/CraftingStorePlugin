@@ -2,19 +2,18 @@ package net.craftingstore.bukkit;
 
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Socket;
+import net.craftingstore.bukkit.commands.BuyCommand;
 import net.craftingstore.bukkit.commands.CraftingStoreCommand;
 import net.craftingstore.bukkit.config.Config;
 import net.craftingstore.bukkit.hooks.DonationPlaceholders;
+import net.craftingstore.bukkit.listeners.InventoryClickListener;
 import net.craftingstore.bukkit.models.QueryCache;
-import net.craftingstore.bukkit.timers.DonationCheckTimer;
-import net.craftingstore.bukkit.timers.RecentPaymentsTimer;
-import net.craftingstore.bukkit.timers.TopDonatorTimer;
+import net.craftingstore.bukkit.timers.*;
 import net.craftingstore.bukkit.utils.WebSocketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import java.util.logging.Level;
 
 public class CraftingStoreBukkit extends JavaPlugin {
@@ -28,8 +27,10 @@ public class CraftingStoreBukkit extends JavaPlugin {
     private Config config;
     private String key;
     private Boolean debug;
+    private Boolean disableBuyCommand;
 
     private QueryCache queryCache;
+
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
 
     @Override
@@ -40,9 +41,17 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
         // Get config items.
         this.debug = getConfig().getBoolean("debug");
+        this.disableBuyCommand = getConfig().getBoolean("disable-buy-command");
 
         // Register commands
         this.getCommand("craftingstore").setExecutor(new CraftingStoreCommand());
+
+        if (!this.disableBuyCommand) {
+            this.getCommand("buy").setExecutor(new BuyCommand());
+        }
+
+        // Register listeners
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
 
         refreshKey();
 
@@ -152,6 +161,11 @@ public class CraftingStoreBukkit extends JavaPlugin {
             new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval);
             new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
             new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
+
+            // Get packages & categories, every 50 minutes.
+            if (!this.disableBuyCommand) {
+                new CategoriesTimer(this).runTaskTimerAsynchronously(this, 10, 60 * 50 * 20);
+            }
         }
     }
 

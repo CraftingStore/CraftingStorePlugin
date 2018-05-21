@@ -8,3 +8,6 @@ commands:
   craftingstore:
     description: CraftingStore command
     aliases: [cs]
+  buy:
+    description: Buy command
+    aliases: [csbuy]
