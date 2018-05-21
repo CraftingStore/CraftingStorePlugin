@@ -18,6 +18,12 @@ public class BuyCommand implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
+        // Check if we're not console.
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(CraftingStoreBukkit.getInstance().prefix + "This command may only be executed from ingame!");
+            return false;
+        }
+
         // Get all categories.
         Category categories[] = CraftingStoreBukkit.getInstance().getQueryCache().getCategories();
 
