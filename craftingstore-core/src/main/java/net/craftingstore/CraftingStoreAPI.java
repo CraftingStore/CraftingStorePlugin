@@ -64,13 +64,13 @@ public class CraftingStoreAPI {
         return payments.getResult();
     }
 
-    public Package[] getPackages(String key) throws Exception {
-        String url = API_URL + "packages";
+    public Category[] getCategories(String key) throws Exception {
+        String url = API_URL + "plugin/inventory";
         String json = HttpUtils.getJson(url, key);
 
-        Type type = new TypeToken<Root<Package[]>>() {}.getType();
-        Root<Package[]> packages = gson.fromJson(json, type);
-        return packages.getResult();
+        Type type = new TypeToken<Root<Category[]>>() {}.getType();
+        Root<Category[]> categories = gson.fromJson(json, type);
+        return categories.getResult();
     }
 
     public TopDonator[] getTopDonators(String key) throws Exception {

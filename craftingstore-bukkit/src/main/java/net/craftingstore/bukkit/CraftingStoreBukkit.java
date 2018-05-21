@@ -1,20 +1,23 @@
 package net.craftingstore.bukkit;
 
+import net.craftingstore.Category;
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Socket;
+import net.craftingstore.bukkit.commands.BuyCommand;
 import net.craftingstore.bukkit.commands.CraftingStoreCommand;
 import net.craftingstore.bukkit.config.Config;
 import net.craftingstore.bukkit.hooks.DonationPlaceholders;
+import net.craftingstore.bukkit.listeners.InventoryClickListener;
 import net.craftingstore.bukkit.models.QueryCache;
-import net.craftingstore.bukkit.timers.DonationCheckTimer;
-import net.craftingstore.bukkit.timers.RecentPaymentsTimer;
-import net.craftingstore.bukkit.timers.TopDonatorTimer;
+import net.craftingstore.bukkit.timers.*;
 import net.craftingstore.bukkit.utils.WebSocketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class CraftingStoreBukkit extends JavaPlugin {
@@ -30,6 +33,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
     private Boolean debug;
 
     private QueryCache queryCache;
+
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
 
     @Override
@@ -43,6 +47,10 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
         // Register commands
         this.getCommand("craftingstore").setExecutor(new CraftingStoreCommand());
+        this.getCommand("buy").setExecutor(new BuyCommand());
+
+        // Register listeners
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
 
         refreshKey();
 
@@ -152,6 +160,9 @@ public class CraftingStoreBukkit extends JavaPlugin {
             new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval);
             new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
             new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
+
+            // Get packages & categories, every 50 minutes.
+            new CategoriesTimer(this).runTaskTimerAsynchronously(this, 10, 60 * 50 * 20);
         }
     }
 

@@ -1,12 +1,13 @@
 package net.craftingstore;
 
-public class Package {
+public class Category {
 
     private int id;
     private String name;
-    private Integer category;
+    private String description;
     private String minecraftIconName;
-    private String ingameDescription;
+    private String url;
+    private Package packages[];
 
     public int getId() {
         return id;
@@ -16,16 +17,19 @@ public class Package {
         return name;
     }
 
-    public Integer getCategory() {
-        return category;
-    }
-
-    public String getIngameDescription() {
-        return ingameDescription;
+    public String getDescription() {
+        return description;
     }
 
     public String getMinecraftIconName() {
         return minecraftIconName;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public Package[] getpackages() {
+        return packages;
+    }
 }
