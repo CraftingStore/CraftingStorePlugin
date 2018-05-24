@@ -31,7 +31,7 @@ public class InventoryClickListener implements Listener {
         ItemStack itemClicked = e.getCurrentItem();
 
         // Ignore if it's not our inventory.
-        if (!CraftingStoreBukkit.getInstance().getQueryCache().hasInventory(inventory.getName())) {
+        if (!CraftingStoreBukkit.getInstance().getQueryCache().hasInventory(player.getName())) {
             return;
         }
 
@@ -65,7 +65,7 @@ public class InventoryClickListener implements Listener {
                         if (CraftingStoreBukkit.getInstance().getDebug()) {
                             CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Removed inventory from our storage. Name: " + inventory.getName());
                         }
-                        CraftingStoreBukkit.getInstance().getQueryCache().removeInventory(inventory.getName());
+                        CraftingStoreBukkit.getInstance().getQueryCache().removeInventory(player.getName());
                         return;
                     }
                 }
@@ -89,7 +89,7 @@ public class InventoryClickListener implements Listener {
             if (CraftingStoreBukkit.getInstance().getDebug()) {
                 CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Added inventory to our storage. Name: " + packagesInventory.getName());
             }
-            CraftingStoreBukkit.getInstance().getQueryCache().addInventory(packagesInventory.getName());
+            CraftingStoreBukkit.getInstance().getQueryCache().addInventory(player.getName());
 
             Integer loop = 0;
             for (Package packageItem : packages) {
@@ -124,7 +124,7 @@ public class InventoryClickListener implements Listener {
         if (CraftingStoreBukkit.getInstance().getDebug()) {
             CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Removed inventory from our storage. Name: " + inventory.getName());
         }
-        CraftingStoreBukkit.getInstance().getQueryCache().removeInventory(inventory.getName());
+        CraftingStoreBukkit.getInstance().getQueryCache().removeInventory(player.getName());
         player.closeInventory();
 
         // Open inventory!

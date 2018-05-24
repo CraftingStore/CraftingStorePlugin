@@ -63,7 +63,7 @@ public class BuyCommand implements CommandExecutor {
         }
 
         // Add inventory to our listener & open for player.
-        CraftingStoreBukkit.getInstance().getQueryCache().addInventory(categoriesInventory.getName());
+        CraftingStoreBukkit.getInstance().getQueryCache().addInventory(player.getName());
         if (CraftingStoreBukkit.getInstance().getDebug()) {
             CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Added inventory to our storage. Name: " + categoriesInventory.getName());
         }

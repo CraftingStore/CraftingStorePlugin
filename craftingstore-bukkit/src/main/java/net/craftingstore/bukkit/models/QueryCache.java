@@ -43,12 +43,16 @@ public class QueryCache {
         this.packages = packages;
     }
 
-    public void addInventory(String inventory) {
-        this.inventories.add(inventory);
+    public void addInventory(String playerName) {
+        if (this.inventories.contains(playerName)) {
+            return;
+        }
+
+        this.inventories.add(playerName);
     }
 
-    public Boolean hasInventory(String inventory) {
-        return this.inventories.contains(inventory);
+    public Boolean hasInventory(String playerName) {
+        return this.inventories.contains(playerName);
     }
 
     public void removeInventory(String inventory) {

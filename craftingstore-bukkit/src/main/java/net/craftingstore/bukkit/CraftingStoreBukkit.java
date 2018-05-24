@@ -7,6 +7,7 @@ import net.craftingstore.bukkit.commands.CraftingStoreCommand;
 import net.craftingstore.bukkit.config.Config;
 import net.craftingstore.bukkit.hooks.DonationPlaceholders;
 import net.craftingstore.bukkit.listeners.InventoryClickListener;
+import net.craftingstore.bukkit.listeners.playerDisconnectListener;
 import net.craftingstore.bukkit.models.QueryCache;
 import net.craftingstore.bukkit.timers.*;
 import net.craftingstore.bukkit.utils.WebSocketUtils;
@@ -52,6 +53,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
+        getServer().getPluginManager().registerEvents(new playerDisconnectListener(), this);
 
         refreshKey();
 
