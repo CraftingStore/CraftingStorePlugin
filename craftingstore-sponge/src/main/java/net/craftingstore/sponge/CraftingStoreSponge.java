@@ -2,17 +2,22 @@ package net.craftingstore.sponge;
 
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Socket;
+import net.craftingstore.sponge.commands.CraftingStoreCommand;
 import net.craftingstore.sponge.config.Config;
 import net.craftingstore.sponge.models.QueryCache;
 import net.craftingstore.sponge.timers.DonationCheckTimer;
 import net.craftingstore.sponge.utils.WebSocketUtils;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.LiteralText;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 
@@ -38,7 +43,9 @@ public class CraftingStoreSponge {
 
     private QueryCache queryCache;
 
-    public String prefix = TextColors.GRAY + "[" + TextColors.RED + "CraftingStore" + TextColors.GRAY + "] ";
+    public LiteralText.Builder prefix = Text.builder("[").color(TextColors.GRAY)
+            .append(Text.builder("CraftingStore").color(TextColors.RED).build())
+            .append(Text.builder("] ").color(TextColors.GRAY).build());
 
     @Inject
     @DefaultConfig(sharedRoot = false)
@@ -49,8 +56,22 @@ public class CraftingStoreSponge {
         instance = this;
         queryCache = new QueryCache();
 
-        getLogger().info("Plugin is now enabled!");
+        // Register command.
+        CommandSpec mainCommand = CommandSpec.builder()
+                .description(Text.of("CraftingStore main command."))
+                .permission("craftingstore.admin")
+                .arguments(
+                        GenericArguments.optional(GenericArguments.string(Text.of("arg1"))),
+                        GenericArguments.optional(GenericArguments.string(Text.of("arg2")))
+                )
+                .executor(new CraftingStoreCommand())
+                .build();
 
+        Sponge.getCommandManager().register(this, mainCommand, "craftingstore", "cs");
+
+        getLogger().info("We're ready to accept donations!");
+
+        // Reload key, connect to socket, start tasks.
         refreshKey();
 
     }
@@ -64,12 +85,16 @@ public class CraftingStoreSponge {
         }
     }
 
-    private void refreshKey() {
+    public void refreshKey() {
 
-        config = new Config(defaultConfig.toFile(), "config.yml");
+        // Create config.yml
+        this.config = new Config(defaultConfig.toFile(), "config.yml");
+
+        // Set config items.
         this.debug = config.getConfig().getNode("debug").getBoolean();
-        this.key = config.getConfig().getNode("api_key").getString();
+        this.key = config.getConfig().getNode("api-key").getString();
 
+        // Check if the key is empty.
         if (key == null || key.length() == 0) {
             getLogger().info("Your API key is not set. The plugin will not work until your API key is set.");
             this.key = null;
@@ -103,6 +128,7 @@ public class CraftingStoreSponge {
         String socketPusherLocation;
         String socketFallbackUrl;
 
+        // Get socket information.
         try {
             Socket socket = CraftingStoreAPI.getInstance().getSocket(key);
 
@@ -114,7 +140,7 @@ public class CraftingStoreSponge {
             socketFallbackUrl = socket.getSocketFallbackUrl();
 
         } catch (Exception e) {
-            getLogger().info("An error occurred while checking the store status.", e);
+            getLogger().error("An error occurred while checking the store status.", e);
             return;
         }
 
@@ -162,5 +188,10 @@ public class CraftingStoreSponge {
 
     public Logger getLogger() {
         return this.logger;
+    }
+
+    public Config getConfig()
+    {
+        return this.config;
     }
 }

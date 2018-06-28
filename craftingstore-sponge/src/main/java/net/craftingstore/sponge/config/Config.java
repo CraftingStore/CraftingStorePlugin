@@ -41,8 +41,6 @@ public class Config extends File {
 
         try {
             config = loader.load();
-            System.out.println("Config loaded. #1");
-
         } catch (IOException e) {
             e.printStackTrace();
         }
