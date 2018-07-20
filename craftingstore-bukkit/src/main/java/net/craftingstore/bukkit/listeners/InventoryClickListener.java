@@ -57,7 +57,7 @@ public class InventoryClickListener implements Listener {
 
 
             // Check if we're already in the category menu, and if we are.. check the items.
-            if (inventory.getName().equals("CraftingStore: " + category.getName())) {
+            if (inventory.getName().equals(CraftingStoreBukkit.getInstance().getConfig().getString("gui-prefix") + ": " + category.getName())) {
                 for (Package packageItem : packages) {
                     if (itemClicked.getItemMeta().getDisplayName().equals(packageItem.getName())) {
                         player.sendMessage(CraftingStoreBukkit.getInstance().prefix + "You can buy \"" + packageItem.getName() + "\" by clicking on this link: " + packageItem.getUrl());
@@ -83,7 +83,7 @@ public class InventoryClickListener implements Listener {
             }
 
             // Create inventory
-            packagesInventory = Bukkit.createInventory(null, inventorySlots, "CraftingStore: " + category.getName());
+            packagesInventory = Bukkit.createInventory(null, inventorySlots, CraftingStoreBukkit.getInstance().getConfig().getString("gui-prefix") + ": " + category.getName());
 
             // Add inventory to our data model.
             if (CraftingStoreBukkit.getInstance().getDebug()) {

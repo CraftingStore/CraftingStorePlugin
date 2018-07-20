@@ -85,7 +85,9 @@ public class CraftingStoreBukkit extends JavaPlugin {
         String key = getConfig().getString("api-key");
         Integer additionalTimerInterval =  60 * 10 * 20; // minutes.
 
+        // Set variables.
         this.key = key;
+        this.prefix = getConfig().getString("prefix").replace("&", "§") + " ";
 
         if (key.length() == 0) {
             getLogger().log(Level.SEVERE, "Your API key is not set. The plugin will not work until your API key is set.");

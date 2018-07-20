@@ -20,7 +20,7 @@ public class BuyCommand implements CommandExecutor {
 
         // Check if we're not console.
         if (!(sender instanceof Player)) {
-            sender.sendMessage(CraftingStoreBukkit.getInstance().prefix + "This command may only be executed from ingame!");
+            sender.sendMessage(CraftingStoreBukkit.getInstance().prefix + "This command may only be executed from in-game!");
             return false;
         }
 
@@ -36,7 +36,7 @@ public class BuyCommand implements CommandExecutor {
         }
 
         // Create inventory
-        Inventory categoriesInventory = Bukkit.createInventory(null, inventorySlots, "CraftingStore: Categories");
+        Inventory categoriesInventory = Bukkit.createInventory(null, inventorySlots, CraftingStoreBukkit.getInstance().getConfig().getString("gui-prefix") + ": Categories");
 
         // Get player
         Player player = (Player) sender;
