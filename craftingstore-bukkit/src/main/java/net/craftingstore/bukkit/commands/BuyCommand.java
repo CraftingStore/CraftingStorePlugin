@@ -46,10 +46,18 @@ public class BuyCommand implements CommandExecutor {
         // Walk though categories to build inventory
         for (Category category : categories) {
 
-            // Get material
-            Material material = Material.getMaterial(category.getMinecraftIconName());
-            if (material == null) {
-                material = Material.CHEST;
+            // Only show main categories.
+            if (category.isSubCategory()) {
+                continue;
+            }
+
+            // Get material by name.
+            Material material = Material.CHEST;
+
+            try {
+                material = category.getMinecraftIconName() == null ? Material.CHEST : Material.valueOf(category.getMinecraftIconName());
+            } catch (IllegalArgumentException el) {
+                // Error in name, using the default instead.
             }
 
             // Set item meta.

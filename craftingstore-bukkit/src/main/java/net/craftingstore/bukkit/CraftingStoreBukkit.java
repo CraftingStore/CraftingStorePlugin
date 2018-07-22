@@ -28,8 +28,9 @@ public class CraftingStoreBukkit extends JavaPlugin {
     private String key;
     private Boolean debug;
     private Boolean disableBuyCommand;
-
     private QueryCache queryCache;
+
+    private WebSocketUtils websocketConnection;
 
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
 
@@ -141,11 +142,15 @@ public class CraftingStoreBukkit extends JavaPlugin {
                 interval = 1200;
             }
 
+            if (this.websocketConnection != null) {
+                this.websocketConnection.disconnectSocketServers();
+            }
+
             // Use check if we should use realtime sockets (only if this is a premium store)
             if (socketsEnabled) {
 
                 // Enable socket connection.
-                new WebSocketUtils(key, socketsUrl, socketsProvider, socketPusherApi, socketPusherLocation, socketFallbackUrl);
+                this.websocketConnection = new WebSocketUtils(key, socketsUrl, socketsProvider, socketPusherApi, socketPusherLocation, socketFallbackUrl);
 
                 // Set interval to 35 minutes, as backup method.
                 interval = 60 * 35 * 20;

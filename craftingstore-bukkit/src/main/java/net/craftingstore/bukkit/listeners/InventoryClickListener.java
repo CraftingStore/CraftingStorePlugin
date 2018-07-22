@@ -52,6 +52,11 @@ public class InventoryClickListener implements Listener {
         Inventory packagesInventory = null;
         for (Category category : categories) {
 
+            // Only show main categories.
+            if (category.isSubCategory()) {
+                continue;
+            }
+
             // Get packages
             Package packages[] = category.getpackages();
 
@@ -94,10 +99,13 @@ public class InventoryClickListener implements Listener {
             Integer loop = 0;
             for (Package packageItem : packages) {
 
-                // Get material
-                Material material = Material.getMaterial(packageItem.getMinecraftIconName());
-                if (material == null) {
-                    material = Material.PAPER;
+                // Get material by name.
+                Material material = Material.PAPER;
+
+                try {
+                    material = packageItem.getMinecraftIconName() == null ? Material.PAPER : Material.valueOf(packageItem.getMinecraftIconName().toUpperCase());
+                } catch (IllegalArgumentException el) {
+                    // Error in name, using the default instead.
                 }
 
                 // Set item meta.
@@ -105,7 +113,11 @@ public class InventoryClickListener implements Listener {
                 ItemMeta im = item.getItemMeta();
                 im.setDisplayName(packageItem.getName());
                 ArrayList<String> lore = new ArrayList<String>();
-                lore.add(packageItem.getIngameDescription());
+                if (packageItem.getIngameDescription() != null) {
+                    for (String description : packageItem.getIngameDescription().split("\n")) {
+                        lore.add(description.replace("\n", "").replace("\r", "").replace("&", "§"));
+                    }
+                }
                 im.setLore(lore);
 
                 item.setItemMeta(im);
