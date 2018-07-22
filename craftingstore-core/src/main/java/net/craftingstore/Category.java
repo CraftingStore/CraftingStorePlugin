@@ -7,6 +7,7 @@ public class Category {
     private String description;
     private String minecraftIconName;
     private String url;
+    private Boolean subCategory;
     private Package packages[];
 
     public int getId() {
@@ -27,6 +28,10 @@ public class Category {
 
     public String getUrl() {
         return url;
+    }
+
+    public Boolean isSubCategory() {
+        return subCategory;
     }
 
     public Package[] getpackages() {

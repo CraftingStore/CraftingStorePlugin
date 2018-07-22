@@ -20,7 +20,7 @@ public class BuyCommand implements CommandExecutor {
 
         // Check if we're not console.
         if (!(sender instanceof Player)) {
-            sender.sendMessage(CraftingStoreBukkit.getInstance().prefix + "This command may only be executed from ingame!");
+            sender.sendMessage(CraftingStoreBukkit.getInstance().prefix + "This command may only be executed from in-game!");
             return false;
         }
 
@@ -36,7 +36,7 @@ public class BuyCommand implements CommandExecutor {
         }
 
         // Create inventory
-        Inventory categoriesInventory = Bukkit.createInventory(null, inventorySlots, "CraftingStore: Categories");
+        Inventory categoriesInventory = Bukkit.createInventory(null, inventorySlots, CraftingStoreBukkit.getInstance().getConfig().getString("gui-prefix") + ": Categories");
 
         // Get player
         Player player = (Player) sender;
@@ -46,10 +46,18 @@ public class BuyCommand implements CommandExecutor {
         // Walk though categories to build inventory
         for (Category category : categories) {
 
-            // Get material
-            Material material = Material.getMaterial(category.getMinecraftIconName());
-            if (material == null) {
-                material = Material.CHEST;
+            // Only show main categories.
+            if (category.isSubCategory()) {
+                continue;
+            }
+
+            // Get material by name.
+            Material material = Material.CHEST;
+
+            try {
+                material = category.getMinecraftIconName() == null ? Material.CHEST : Material.valueOf(category.getMinecraftIconName());
+            } catch (IllegalArgumentException el) {
+                // Error in name, using the default instead.
             }
 
             // Set item meta.

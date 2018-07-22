@@ -52,12 +52,17 @@ public class InventoryClickListener implements Listener {
         Inventory packagesInventory = null;
         for (Category category : categories) {
 
+            // Only show main categories.
+            if (category.isSubCategory()) {
+                continue;
+            }
+
             // Get packages
             Package packages[] = category.getpackages();
 
 
             // Check if we're already in the category menu, and if we are.. check the items.
-            if (inventory.getName().equals("CraftingStore: " + category.getName())) {
+            if (inventory.getName().equals(CraftingStoreBukkit.getInstance().getConfig().getString("gui-prefix") + ": " + category.getName())) {
                 for (Package packageItem : packages) {
                     if (itemClicked.getItemMeta().getDisplayName().equals(packageItem.getName())) {
                         player.sendMessage(CraftingStoreBukkit.getInstance().prefix + "You can buy \"" + packageItem.getName() + "\" by clicking on this link: " + packageItem.getUrl());
@@ -83,7 +88,7 @@ public class InventoryClickListener implements Listener {
             }
 
             // Create inventory
-            packagesInventory = Bukkit.createInventory(null, inventorySlots, "CraftingStore: " + category.getName());
+            packagesInventory = Bukkit.createInventory(null, inventorySlots, CraftingStoreBukkit.getInstance().getConfig().getString("gui-prefix") + ": " + category.getName());
 
             // Add inventory to our data model.
             if (CraftingStoreBukkit.getInstance().getDebug()) {
@@ -94,10 +99,13 @@ public class InventoryClickListener implements Listener {
             Integer loop = 0;
             for (Package packageItem : packages) {
 
-                // Get material
-                Material material = Material.getMaterial(packageItem.getMinecraftIconName());
-                if (material == null) {
-                    material = Material.PAPER;
+                // Get material by name.
+                Material material = Material.PAPER;
+
+                try {
+                    material = packageItem.getMinecraftIconName() == null ? Material.PAPER : Material.valueOf(packageItem.getMinecraftIconName().toUpperCase());
+                } catch (IllegalArgumentException el) {
+                    // Error in name, using the default instead.
                 }
 
                 // Set item meta.
@@ -105,7 +113,11 @@ public class InventoryClickListener implements Listener {
                 ItemMeta im = item.getItemMeta();
                 im.setDisplayName(packageItem.getName());
                 ArrayList<String> lore = new ArrayList<String>();
-                lore.add(packageItem.getIngameDescription());
+                if (packageItem.getIngameDescription() != null) {
+                    for (String description : packageItem.getIngameDescription().split("\n")) {
+                        lore.add(description.replace("\n", "").replace("\r", "").replace("&", "§"));
+                    }
+                }
                 im.setLore(lore);
 
                 item.setItemMeta(im);

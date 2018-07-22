@@ -28,6 +28,10 @@ public class WebSocketUtils {
     private String pusherLocation;
     private String socketFallbackUrl;
 
+    // Socket connections
+    private Pusher pusher;
+    private Socket socketIo;
+
     public WebSocketUtils(String apiKey, String socketsURL, Integer socketsProvider, String pusherApiKey, String pusherLocation, String fallbackSocketUrl) {
 
         this.apiKey = apiKey;
@@ -73,9 +77,9 @@ public class WebSocketUtils {
         }
 
         PusherOptions options = new PusherOptions().setCluster(this.pusherLocation);
-        Pusher pusher = new Pusher(this.pusherApiKey, options);
+        this.pusher = new Pusher(this.pusherApiKey, options);
 
-        pusher.connect(new ConnectionEventListener() {
+        this.pusher.connect(new ConnectionEventListener() {
 
             public void onConnectionStateChange(ConnectionStateChange change) {
                 if (change.getCurrentState() == ConnectionState.CONNECTED) {
@@ -112,6 +116,17 @@ public class WebSocketUtils {
                 }
             }
         });
+
+        // Reload plugin
+        channel.bind("reload-plugin", new SubscriptionEventListener() {
+
+            public void onEvent(String channel, String event, String data) {
+
+                // Reload the plugin.
+                CraftingStoreBukkit.getInstance().refreshKey();
+            }
+        });
+
     }
 
 
@@ -121,8 +136,8 @@ public class WebSocketUtils {
             CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Using CraftingStore NodeJs socket server. (" + socketsURL + ")");
         }
 
-        final Socket socket = IO.socket(socketsURL);
-        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+        this.socketIo = IO.socket(socketsURL);
+        this.socketIo.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
@@ -143,6 +158,15 @@ public class WebSocketUtils {
                 }
             }
 
+        }).on("reload-plugin", new Emitter.Listener() {
+
+            @Override
+            public void call(Object... args) {
+
+                // Reload the plugin.
+                CraftingStoreBukkit.getInstance().refreshKey();
+            }
+
         }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
 
             @Override
@@ -151,7 +175,32 @@ public class WebSocketUtils {
             }
 
         });
-        socket.connect();
+        this.socketIo.connect();
+    }
+
+    /**
+     * Disconnect from all socket servers.
+     */
+    public void disconnectSocketServers()
+    {
+        /* Pusher.com */
+        if (this.socketsProvider == 1) {
+
+            // Call pusher method.
+            if (this.pusher != null) {
+                this.pusher.disconnect();
+            }
+
+
+            /* Socket.IO server */
+        } else {
+
+            // Call custom server method.
+            if (this.socketIo != null) {
+                this.socketIo.disconnect();
+            }
+
+        }
     }
 
 }

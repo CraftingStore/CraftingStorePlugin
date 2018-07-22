@@ -1,3 +1,5 @@
 api-key: ''
+prefix: '&7[&cCraftingstore&7]'
+gui-prefix: CraftingStore
 interval: 120
 disable-buy-command: false
