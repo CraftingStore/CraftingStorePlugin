@@ -23,10 +23,11 @@ public class WebSocketUtils {
     private String apiKey;
 
     private String socketsURL;
-    private Integer socketsProvider;
+    private int socketsProvider;
     private String pusherApiKey;
     private String pusherLocation;
     private String socketFallbackUrl;
+    private int disconnects = 0;
 
     // Socket connections
     private Pusher pusher;
@@ -90,12 +91,6 @@ public class WebSocketUtils {
 
             public void onError(String message, String code, Exception e) {
 
-                // Pusher gave us an error.. try our custom socket (fallback) server instead.
-                try {
-                    moduleCustomServer(socketFallbackUrl);
-                } catch (URISyntaxException e1) {
-                    e1.printStackTrace();
-                }
             }
 
         }, ConnectionState.ALL);
@@ -126,7 +121,6 @@ public class WebSocketUtils {
                 CraftingStoreBukkit.getInstance().refreshKey();
             }
         });
-
     }
 
 
@@ -136,15 +130,22 @@ public class WebSocketUtils {
             CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Using CraftingStore NodeJs socket server. (" + socketsURL + ")");
         }
 
-        this.socketIo = IO.socket(socketsURL);
+        IO.Options options = new IO.Options();
+        options.reconnection = false;
+        this.socketIo = IO.socket(socketsURL, options);
+
         this.socketIo.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
-                CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Your server successfully connected to CraftingStore.net.");
+                if (CraftingStoreBukkit.getInstance().getDebug()) {
+                    CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Your server successfully connected to CraftingStore.net.");
+                }
+                socketIo.emit("auth-client", apiKey);
+                socketIo.emit("version", CraftingStoreBukkit.getInstance().getDescription().getVersion());
             }
 
-        }).on(this.apiKey, new Emitter.Listener() {
+        }).on("receive-donation", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
@@ -171,7 +172,11 @@ public class WebSocketUtils {
 
             @Override
             public void call(Object... args) {
-                CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Your server disconnected from CraftingStore.net.");
+                disconnects++;
+                if (CraftingStoreBukkit.getInstance().getDebug()) {
+                    CraftingStoreBukkit.getInstance().getLogger().log(Level.INFO, "Your server disconnected from CraftingStore.net, falling back to polling.");
+                }
+                CraftingStoreBukkit.getInstance().startTimers(1700, 60 * 50 * 20);
             }
 
         });

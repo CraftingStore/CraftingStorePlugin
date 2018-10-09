@@ -84,7 +84,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
     public void refreshKey() {
 
         String key = getConfig().getString("api-key");
-        Integer additionalTimerInterval =  60 * 10 * 20; // minutes.
+        int additionalTimerInterval =  60 * 10 * 20; // minutes.
 
         // Set variables.
         this.key = key;
@@ -110,8 +110,8 @@ public class CraftingStoreBukkit extends JavaPlugin {
         }
 
         // Check if we should enable sockets.
-        Integer socketsProvider;
-        Boolean socketsEnabled;
+        int socketsProvider;
+        boolean socketsEnabled;
         String socketsUrl;
 
         String socketPusherApi;
@@ -146,7 +146,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
                 this.websocketConnection.disconnectSocketServers();
             }
 
-            // Use check if we should use realtime sockets (only if this is a premium store)
+            // Use check if we should use real-time sockets (only if this is a premium store)
             if (socketsEnabled) {
 
                 // Enable socket connection.
@@ -163,11 +163,7 @@ public class CraftingStoreBukkit extends JavaPlugin {
                 }
             }
 
-            Bukkit.getScheduler().cancelTasks(this);
-
-            new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval);
-            new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
-            new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
+            this.startTimers(interval, additionalTimerInterval);
 
             // Get packages & categories, every 50 minutes.
             if (!this.disableBuyCommand) {
@@ -186,5 +182,13 @@ public class CraftingStoreBukkit extends JavaPlugin {
 
     public QueryCache getQueryCache() {
         return queryCache;
+    }
+
+    public void startTimers(int interval, int additionalTimerInterval) {
+        Bukkit.getScheduler().cancelTasks(this);
+
+        new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval);
+        new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
+        new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
     }
 }
