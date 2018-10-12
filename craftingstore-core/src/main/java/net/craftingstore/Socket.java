@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Socket {
 
-    private boolean socketAllowed;
+    private boolean socketEnabled;
     private Integer socketSupplier;
-    private String socketUrl;
+    private String socketConnectUrl;
     private String socketFallbackUrl;
 
     private String pusherApi;
@@ -14,11 +14,11 @@ public class Socket {
 
 
     public boolean getSocketAllowed() {
-        return socketAllowed;
+        return socketEnabled;
     }
 
     public String getSocketUrl() {
-        return socketUrl;
+        return socketConnectUrl;
     }
 
     public Integer getSocketProvider() {
