@@ -9,7 +9,7 @@ import net.craftingstore.bukkit.hooks.DonationPlaceholders;
 import net.craftingstore.bukkit.listeners.InventoryClickListener;
 import net.craftingstore.bukkit.models.QueryCache;
 import net.craftingstore.bukkit.timers.*;
-import net.craftingstore.bukkit.utils.WebSocketUtils;
+import net.craftingstore.utils.SocketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,10 +27,17 @@ public class CraftingStoreBukkit extends JavaPlugin {
     private Config config;
     private String key;
     private Boolean debug;
+    private int intervalDonationTimer = 1200;
+    private int intervalOtherTimers =  60 * 10 * 20;
     private Boolean disableBuyCommand;
     private QueryCache queryCache;
 
-    private WebSocketUtils websocketConnection;
+    // SOCKET: Custom
+    private boolean socketEnabled;
+    private String socketCustomUrl;
+
+    private SocketUtils webSocketUtils = null;
+
 
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
 
@@ -84,7 +91,6 @@ public class CraftingStoreBukkit extends JavaPlugin {
     public void refreshKey() {
 
         String key = getConfig().getString("api-key");
-        int additionalTimerInterval =  60 * 10 * 20; // minutes.
 
         // Set variables.
         this.key = key;
@@ -109,66 +115,23 @@ public class CraftingStoreBukkit extends JavaPlugin {
             return;
         }
 
-        // Check if we should enable sockets.
-        int socketsProvider;
-        boolean socketsEnabled;
-        String socketsUrl;
-
-        String socketPusherApi;
-        String socketPusherLocation;
-        String socketFallbackUrl;
-
-        try {
-            Socket socket = CraftingStoreAPI.getInstance().getSocket(key);
-
-            socketsUrl = socket.getSocketUrl();
-            socketsEnabled = socket.getSocketAllowed();
-            socketsProvider = socket.getSocketProvider();
-            socketPusherApi = socket.getPusherApi();
-            socketPusherLocation = socket.getPusherLocation();
-            socketFallbackUrl = socket.getSocketFallbackUrl();
-
-        } catch (Exception e) {
-            getLogger().log(Level.SEVERE, "An error occurred while checking the store status.", e);
-            return;
-        }
 
         if (this.key != null) {
             getLogger().log(Level.INFO, "Your key is valid, and you are ready to accept donations!");
 
-            int interval = getConfig().getInt("interval") * 20;
-            if (interval < 1200) {
+            intervalDonationTimer = getConfig().getInt("interval") * 20;
+
+            if (intervalDonationTimer < 1200) {
                 getLogger().log(Level.WARNING, "The interval cannot be lower than 60 seconds. An interval of 60 seconds will be used.");
-                interval = 1200;
+                intervalDonationTimer = 1200;
             }
 
-            if (this.websocketConnection != null) {
-                this.websocketConnection.disconnectSocketServers();
-            }
+            // SOCKETS: Connect
+            this.getSocket();
+            this.connectToSocket();
 
-            // Use check if we should use real-time sockets (only if this is a premium store)
-            if (socketsEnabled) {
-
-                // Enable socket connection.
-                this.websocketConnection = new WebSocketUtils(key, socketsUrl, socketsProvider, socketPusherApi, socketPusherLocation, socketFallbackUrl);
-
-                // Set interval to 35 minutes, as backup method.
-                interval = 60 * 35 * 20;
-
-                // Set interval to 50 minutes, as backup method.
-                additionalTimerInterval = 60 * 50 * 20;
-
-                if (this.debug) {
-                    getLogger().log(Level.INFO, "Instant payments enabled, using sockets. [URL: " + socketsUrl + " | Provider: " + socketsProvider + "]");
-                }
-            }
-
-            this.startTimers(interval, additionalTimerInterval);
-
-            // Get packages & categories, every 50 minutes.
-            if (!this.disableBuyCommand) {
-                new CategoriesTimer(this).runTaskTimerAsynchronously(this, 10, 60 * 50 * 20);
-            }
+            // Start timers.
+            this.startTimers(intervalDonationTimer, intervalOtherTimers);
         }
     }
 
@@ -184,11 +147,84 @@ public class CraftingStoreBukkit extends JavaPlugin {
         return queryCache;
     }
 
+    public SocketUtils getWebSocketUtils() {
+        return webSocketUtils;
+    }
+
+    public int getIntervalDonationTimer() {
+        return intervalDonationTimer;
+    }
+
+    public int getIntervalOtherTimers() {
+        return intervalOtherTimers;
+    }
+
+    public void setSocketEnabled(boolean enabled) {
+        this.socketEnabled = enabled;
+    }
+
+    public void getSocket() {
+
+        String apiKey = CraftingStoreBukkit.getInstance().getKey();
+        try {
+            Socket socket = CraftingStoreAPI.getInstance().getSocket(apiKey);
+
+            // GLOBAL
+            this.socketEnabled = socket.getSocketAllowed();
+            this.socketCustomUrl = socket.getSocketUrl();
+
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "An error occurred while checking the store status.", e);
+        }
+    }
+
+    public void connectToSocket()
+    {
+        // Disconnect.
+        if (webSocketUtils != null) {
+            webSocketUtils.disconnect();
+        }
+
+        // Socket connection.
+        if (socketEnabled) {
+
+            if (debug) {
+                getLogger().log(Level.INFO, "Socket connection enabled, tyring to connect with: " + socketCustomUrl);
+            }
+
+            // Enable socket connection.
+            webSocketUtils = new SocketUtils(key, socketCustomUrl);
+
+            if (webSocketUtils.getConnected()) {
+
+                if (debug) {
+                    getLogger().log(Level.INFO, "Socket is now connected, this is NOT validated.");
+                }
+
+                // Set interval to 35 minutes, as backup method.
+                intervalDonationTimer = 60 * 35 * 20;
+
+                // Set interval to 50 minutes, as backup method.
+                intervalOtherTimers = 60 * 50 * 20;
+
+            }
+        }
+    }
+
     public void startTimers(int interval, int additionalTimerInterval) {
         Bukkit.getScheduler().cancelTasks(this);
 
         new DonationCheckTimer(this).runTaskTimerAsynchronously(this, 6 * 20, interval);
         new TopDonatorTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
         new RecentPaymentsTimer(this).runTaskTimerAsynchronously(this, 20, additionalTimerInterval);
+
+        if (socketEnabled) {
+            new SocketCheckTimer(this).runTaskTimerAsynchronously(this, 120, 150);
+        }
+
+        // Get packages & categories, every 50 minutes.
+        if (!disableBuyCommand) {
+            new CategoriesTimer(this).runTaskTimerAsynchronously(this, 10, 60 * 50 * 20);
+        }
     }
 }

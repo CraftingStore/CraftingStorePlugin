@@ -6,7 +6,7 @@
 
     <groupId>net.craftingstore</groupId>
     <artifactId>craftingstore</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -64,19 +64,19 @@
         <dependency>
             <groupId>net.craftingstore</groupId>
             <artifactId>craftingstore-bukkit</artifactId>
-            <version>1.4-SNAPSHOT</version>
+            <version>1.5-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>net.craftingstore</groupId>
             <artifactId>craftingstore-bungee</artifactId>
-            <version>1.4-SNAPSHOT</version>
+            <version>1.5-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>net.craftingstore</groupId>
             <artifactId>craftingstore-sponge</artifactId>
-            <version>1.4-SNAPSHOT</version>
+            <version>1.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

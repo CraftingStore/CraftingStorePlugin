@@ -3,9 +3,10 @@ package net.craftingstore.bungee;
 import net.craftingstore.CraftingStoreAPI;
 import net.craftingstore.Socket;
 import net.craftingstore.bungee.commands.CraftingStoreCommand;
-import net.craftingstore.bungee.utils.WebSocketUtils;
+import net.craftingstore.bungee.timers.SocketCheckTimer;
 import net.craftingstore.bungee.config.Config;
 import net.craftingstore.bungee.timers.DonationCheckTimer;
+import net.craftingstore.utils.SocketUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -24,7 +25,14 @@ public class CraftingStoreBungee extends Plugin {
     private Config config;
     private String key;
     private Boolean debug;
+    private int intervalDonationTimer = 60;
     public String prefix = ChatColor.GRAY + "[" + ChatColor.RED + "CraftingStore" + ChatColor.GRAY + "] ";
+
+    // SOCKET: Custom
+    private boolean socketEnabled;
+    private String socketCustomUrl;
+
+    private SocketUtils webSocketUtils = null;
 
     @Override
     public void onEnable() {
@@ -59,6 +67,18 @@ public class CraftingStoreBungee extends Plugin {
         return debug;
     }
 
+    public SocketUtils getWebSocketUtils() {
+        return webSocketUtils;
+    }
+
+    public int getIntervalDonationTimer() {
+        return intervalDonationTimer;
+    }
+
+    public void setSocketEnabled(boolean enabled) {
+        this.socketEnabled = enabled;
+    }
+
     public void refreshKey() {
 
         String key = getConfig().getString("api-key");
@@ -86,45 +106,61 @@ public class CraftingStoreBungee extends Plugin {
 
             getLogger().log(Level.INFO, "Your key is valid, and you are ready to accept donations!");
 
-            int interval = getConfig().getInt("interval");
-            if (interval < 60) {
+            intervalDonationTimer = getConfig().getInt("interval");
+            if (intervalDonationTimer < 60) {
                 getLogger().log(Level.WARNING, "The interval cannot be lower than 60 seconds. An interval of 60 seconds will be used.");
-                interval = 60;
+                intervalDonationTimer = 60;
             }
 
-            // Check if we should enable sockets.
-            Integer socketsProvider;
-            Boolean socketsEnabled;
-            String socketsUrl;
+            this.startTimers(intervalDonationTimer);
 
-            try {
-                Socket socket = CraftingStoreAPI.getInstance().getSocket(key);
+            // SOCKETS: Connect
+            this.getSocket();
+            this.connectToSocket();
+        }
+    }
 
-                socketsUrl = socket.getSocketUrl();
-                socketsEnabled = socket.getSocketAllowed();
-                socketsProvider = socket.getSocketProvider();
 
-            } catch (Exception e) {
-                getLogger().log(Level.SEVERE, "An error occurred while checking the store status.", e);
-                return;
-            }
+    public void getSocket() {
 
-            // Use check if we should use realtime sockets (only if this is a premium store)
-            if (socketsEnabled) {
+        String apiKey = this.key;
+        try {
+            Socket socket = CraftingStoreAPI.getInstance().getSocket(apiKey);
 
-                // Enable socket connection.
-                new WebSocketUtils(key, socketsUrl, socketsProvider);
+            // GLOBAL
+            this.socketEnabled = socket.getSocketAllowed();
+            this.socketCustomUrl = socket.getSocketUrl();
 
-                // Set interval to 35 minutes, as backup method.
-                interval = 60 * 35;
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "An error occurred while checking the store status.", e);
+        }
+    }
 
-                if (this.debug) {
-                    getLogger().log(Level.INFO, "Instant payments enabled, using sockets. [URL: " + socketsUrl + " | Provider: " + socketsProvider + "]");
-                }
-            }
+    public void connectToSocket()
+    {
+        // Disconnect.
+        if (webSocketUtils != null) {
+            webSocketUtils.disconnect();
+        }
 
-            getProxy().getScheduler().cancel(this);
-            getProxy().getScheduler().schedule(this, new DonationCheckTimer(this), 10, interval, TimeUnit.SECONDS);
+        // Socket connection.
+        if (socketEnabled) {
+
+            // Enable socket connection.
+            webSocketUtils = new SocketUtils(key, socketCustomUrl);
+
+            // Set interval to 35 minutes, as backup method.
+            intervalDonationTimer = 60 * 35;
+        }
+    }
+
+    public void startTimers(int interval) {
+
+        getProxy().getScheduler().cancel(this);
+        getProxy().getScheduler().schedule(this, new DonationCheckTimer(this), 10, interval, TimeUnit.SECONDS);
+
+        if (socketEnabled) {
+            getProxy().getScheduler().schedule(this, new SocketCheckTimer(this), 40, 6, TimeUnit.SECONDS);
         }
     }
 

@@ -6,7 +6,8 @@ import net.craftingstore.sponge.commands.CraftingStoreCommand;
 import net.craftingstore.sponge.config.Config;
 import net.craftingstore.sponge.models.QueryCache;
 import net.craftingstore.sponge.timers.DonationCheckTimer;
-import net.craftingstore.sponge.utils.WebSocketUtils;
+import net.craftingstore.sponge.timers.SocketCheckTimer;
+import net.craftingstore.utils.SocketUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -23,9 +24,10 @@ import org.spongepowered.api.text.format.TextColors;
 
 import org.slf4j.Logger;
 import java.nio.file.Path;
+
 import com.google.inject.Inject;
 
-@Plugin(id = "craftingstore", name = "CraftingStore", version = "1.3")
+@Plugin(id = "craftingstore", name = "CraftingStore", version = "1.5")
 public class CraftingStoreSponge {
 
     private static CraftingStoreSponge instance;
@@ -36,7 +38,14 @@ public class CraftingStoreSponge {
 
     private String key;
     private Boolean debug;
+    private int intervalDonationTimer = 1200;
     private Config config;
+
+    // SOCKET: Custom
+    private boolean socketEnabled;
+    private String socketCustomUrl;
+
+    private SocketUtils webSocketUtils = null;
 
     @Inject
     private Logger logger;
@@ -114,62 +123,23 @@ public class CraftingStoreSponge {
             return;
         }
 
-        // Cancel tasks.
-        for (Task task : Sponge.getScheduler().getScheduledTasks(this)) {
-            task.cancel();
-        }
-
-        // Check if we should enable sockets.
-        Integer socketsProvider;
-        Boolean socketsEnabled;
-        String socketsUrl;
-
-        String socketPusherApi;
-        String socketPusherLocation;
-        String socketFallbackUrl;
-
-        // Get socket information.
-        try {
-            Socket socket = CraftingStoreAPI.getInstance().getSocket(key);
-
-            socketsUrl = socket.getSocketUrl();
-            socketsEnabled = socket.getSocketAllowed();
-            socketsProvider = socket.getSocketProvider();
-            socketPusherApi = socket.getPusherApi();
-            socketPusherLocation = socket.getPusherLocation();
-            socketFallbackUrl = socket.getSocketFallbackUrl();
-
-        } catch (Exception e) {
-            getLogger().error("An error occurred while checking the store status.", e);
-            return;
-        }
 
         if (this.key != null) {
             getLogger().info("Your key is valid, and you are ready to accept donations!");
 
-            int interval = config.getConfig().getNode("interval").getInt() * 20;
+            intervalDonationTimer = config.getConfig().getNode("interval").getInt() * 20;
 
-            if (interval < 1200) {
+            if (intervalDonationTimer < 1200) {
                 getLogger().warn("The interval cannot be lower than 60 seconds. An interval of 60 seconds will be used.");
-                interval = 1200;
+                intervalDonationTimer = 1200;
             }
 
-            // Use check if we should use realtime sockets (only if this is a premium store)
-            if (socketsEnabled) {
+            // SOCKETS: Connect
+            this.getSocket();
+            this.connectToSocket();
 
-                // Enable socket connection.
-                new WebSocketUtils(key, socketsUrl, socketsProvider, socketPusherApi, socketPusherLocation, socketFallbackUrl);
-
-                // Set interval to 35 minutes, as backup method.
-                interval = 60 * 35 * 20;
-
-                if (this.debug) {
-                    getLogger().info("Instant payments enabled, using sockets. [URL: " + socketsUrl + " | Provider: " + socketsProvider + "]");
-                }
-            }
-
-
-            Sponge.getScheduler().createTaskBuilder().async().delayTicks(20).intervalTicks(interval).execute(new DonationCheckTimer(this)).submit(this);
+            // Start timers.
+            this.startTimers(intervalDonationTimer);
 
         }
     }
@@ -193,5 +163,66 @@ public class CraftingStoreSponge {
     public Config getConfig()
     {
         return this.config;
+    }
+
+
+    public SocketUtils getWebSocketUtils() {
+        return webSocketUtils;
+    }
+
+    public int getIntervalDonationTimer() {
+        return intervalDonationTimer;
+    }
+
+    public void setSocketEnabled(boolean enabled) {
+        this.socketEnabled = enabled;
+    }
+
+
+    public void getSocket() {
+
+        String apiKey = key;
+        try {
+            Socket socket = CraftingStoreAPI.getInstance().getSocket(apiKey);
+
+            // GLOBAL
+            this.socketEnabled = socket.getSocketAllowed();
+            this.socketCustomUrl = socket.getSocketUrl();
+
+        } catch (Exception e) {
+            // ERROR
+        }
+    }
+
+    public void connectToSocket()
+    {
+        // Disconnect.
+        if (webSocketUtils != null) {
+            webSocketUtils.disconnect();
+        }
+
+        // Socket connection.
+        if (socketEnabled) {
+
+            // Enable socket connection.
+            webSocketUtils = new SocketUtils(key, socketCustomUrl);
+
+            // Set interval to 35 minutes, as backup method.
+            intervalDonationTimer = 60 * 35 * 20;
+        }
+    }
+
+    public void startTimers(int interval) {
+
+        // Cancel tasks.
+        for (Task task : Sponge.getScheduler().getScheduledTasks(this)) {
+            task.cancel();
+        }
+
+        Sponge.getScheduler().createTaskBuilder().async().delayTicks(20).intervalTicks(interval).execute(new DonationCheckTimer(this)).submit(this);
+
+        if (socketEnabled) {
+            Sponge.getScheduler().createTaskBuilder().async().delayTicks(160).intervalTicks(interval).execute(new SocketCheckTimer(this)).submit(this);
+        }
     }
 }
